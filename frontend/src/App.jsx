@@ -3,6 +3,7 @@ import { q, supabase } from './supabase'
 import Login, { SetNewPassword } from './components/Login'
 import SchoolSetup from './components/SchoolSetup'
 import CurriculumTab from './components/CurriculumTab'
+import ReadinessTab from './components/ReadinessTab'
 import MembersTab from './components/MembersTab'
 import PlannerTab from './components/PlannerTab'
 import UsageTab from './components/UsageTab'
@@ -12,6 +13,7 @@ import Logo from './components/Logo'
 
 const STAFF_TABS = [
   { id: 'curriculum', label: 'Curriculum' },
+  { id: 'readiness', label: 'Promotion Readiness' },
   { id: 'members', label: 'Members & Roster' },
   { id: 'planner', label: 'Class Planner' },
   { id: 'usage', label: 'AI Usage' },
@@ -105,6 +107,7 @@ function Signed({ user }) {
         {current.status === 'inactive' && <div className="card empty"><h2>Membership inactive</h2><p>Contact your school.</p></div>}
         {current.status === 'active' && !isStaff && <StudentView school={current.schools} />}
         {isStaff && tab === 'curriculum' && <CurriculumTab school={current.schools} />}
+        {isStaff && tab === 'readiness' && <ReadinessTab school={current.schools} />}
         {isStaff && tab === 'members' && <MembersTab school={current.schools} me={user.id} myRole={current.role} />}
         {isStaff && tab === 'planner' && <PlannerTab school={current.schools} />}
         {isStaff && tab === 'usage' && <UsageTab school={current.schools} />}

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { api, fmtDate, q, supabase } from '../supabase'
 import ImportReview from './ImportReview'
+import AgentSteps from './AgentSteps'
 
 function CurriculumTab({ school }) {
   const [programs, setPrograms] = useState(null)
@@ -38,9 +39,10 @@ function CurriculumTab({ school }) {
       </div>
       {error && <p className="error">{error}</p>}
 
-      <VisibilityCard school={school} />
+      {/* New schools see the import first (with the sample highlighted); settings come after. */}
+      <ImportForm school={school} sampleFirst={programs?.length === 0} onCreated={(row) => { setReviewing(row); load() }} />
 
-      <ImportForm school={school} onCreated={(row) => { setReviewing(row); load() }} />
+      {programs?.length > 0 && <VisibilityCard school={school} />}
 
       {drafts.length > 0 && (
         <div className="card">
@@ -133,35 +135,57 @@ export function IssueCounts({ issues }) {
   )
 }
 
-function ImportForm({ school, onCreated }) {
+const SAMPLE_URL = '/samples/sample-adult-curriculum.pdf'
+const wait = (ms) => new Promise((r) => setTimeout(r, ms))
+
+function ImportForm({ school, onCreated, sampleFirst = false }) {
   const [files, setFiles] = useState([])
   const [program, setProgram] = useState('')
   const [readLayout, setReadLayout] = useState(true)
   const [busy, setBusy] = useState(false)
+  const [steps, setSteps] = useState([])
   const [error, setError] = useState(null)
 
-  const submit = async (e) => {
-    e.preventDefault()
-    setBusy(true); setError(null)
+  // Start the import, then follow the agents step by step until the draft is ready.
+  const run = async (programName, fileList) => {
+    setBusy(true); setError(null); setSteps([])
     const form = new FormData()
-    form.append('program_name', program)
+    form.append('program_name', programName)
     form.append('read_layout', readLayout ? 'true' : 'false')
-    files.forEach((f) => form.append('files', f))
+    fileList.forEach((f) => form.append('files', f))
     try {
-      const row = await api(`/api/schools/${school.id}/imports`, { form })
-      setFiles([]); setProgram('')
-      onCreated(row)
+      const { job_id } = await api(`/api/schools/${school.id}/imports`, { form })
+      for (let tries = 0; tries < 300; tries++) {
+        await wait(1200)
+        const job = await api(`/api/jobs/${job_id}`, { method: 'GET' })
+        setSteps(job.steps)
+        if (job.status === 'done') { setFiles([]); setProgram(''); setBusy(false); onCreated(job.result); return }
+        if (job.status === 'error') throw new Error(job.error)
+      }
+      throw new Error('This is taking unusually long. Check back in a minute under "Waiting for your review".')
     } catch (err) { setError(err.message) }
     setBusy(false)
   }
 
+  const submit = (e) => { e.preventDefault(); run(program, files) }
+
+  const trySample = async () => {
+    const blob = await (await fetch(SAMPLE_URL)).blob()
+    run('Adult (sample)', [new File([blob], 'Sample Adult Curriculum.pdf', { type: 'application/pdf' })])
+  }
+
   return (
     <form className="card stack" onSubmit={submit}>
-      <h3>Import a curriculum</h3>
+      <div className="row between">
+        <h3 style={{ margin: 0 }}>Import a curriculum</h3>
+        <button type="button" className={sampleFirst ? 'btn dark' : 'btn'} disabled={busy} onClick={trySample}>
+          ▶ Try it with a sample curriculum
+        </button>
+      </div>
       <p className="muted">
         Upload the PDFs you already hand out (one file, or one per rank). The <strong>Import agent</strong> builds the
         rank-by-rank checklist and the <strong>Checker agent</strong> reviews it against your document. Nothing is
-        published until you approve it.
+        published until you approve it. No PDF handy? Try the sample (a real 5-rank jujutsu curriculum).
       </p>
       <div className="grid2">
         <label className="field">Program name
@@ -178,8 +202,8 @@ function ImportForm({ school, onCreated }) {
       {error && <p className="error">{error}</p>}
       <div className="row">
         <button className="btn primary" disabled={busy || !files.length}>{busy ? 'Agents working…' : 'Import with SideKick'}</button>
-        {busy && <><span className="spinner" /><span className="muted">Reading, structuring and checking — usually under a minute.</span></>}
       </div>
+      {busy && <AgentSteps steps={steps} live />}
     </form>
   )
 }

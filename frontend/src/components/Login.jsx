@@ -36,13 +36,33 @@ function Login() {
       <section className="landing-hero">
         <div className="brand" style={{ fontSize: 30 }}><Logo className="brand-mark" /><span>Side<span className="kick">Kick</span></span></div>
         <h1>Every sensei needs a <em>sidekick</em>.</h1>
-        <p style={{ color: '#d4d7de', fontSize: 17 }}>Your A.I. — Assistant Instructor — for running a martial arts school.</p>
-        <ul>
-          <li><strong>Upload your curriculum</strong> as PDFs. SideKick's agents turn it into rank-by-rank checklists and flag anything that looks off.</li>
-          <li><strong>You approve</strong> before students ever see it.</li>
-          <li><strong>Students track their path</strong> to the next rank; you see who needs what.</li>
-          <li><strong>Plan class</strong> around what the students on the mat actually need.</li>
-        </ul>
+        <p className="hero-sub">
+          Your A.I. — <em>Assistant Instructor</em> — turns the curriculum PDFs you already have into rank-by-rank
+          checklists your students actually use. You stay in control of every belt.
+        </p>
+
+        <ol className="how">
+          <li><span>1</span><div><strong>Upload</strong> your curriculum PDFs: belts, kyu grades or levels, lists or tables.</div></li>
+          <li><span>2</span><div><strong>Two agents</strong> build the checklists and check them against your document.</div></li>
+          <li><span>3</span><div><strong>You approve</strong>. Students see only the ranks you allow, and track their path.</div></li>
+        </ol>
+
+        <div className="preview" aria-hidden="true">
+          <div className="preview-head"><span className="belt-swatch" style={{ background: '#7c3aed' }} /> Working toward Purple Belt
+            <span className="preview-pct">16 / 23</span></div>
+          <div className="progress"><div style={{ width: '70%' }} /></div>
+          <div className="preview-items">
+            <span className="on">✓ Harai Goshi</span><span className="on">✓ Hane Goshi</span><span className="on">✓ Tomoe Nage</span>
+            <span>Taiotoshi</span><span className="on">✓ Sleeve grabs</span><span>Kick defense</span>
+          </div>
+          <div className="preview-flag"><span className="pill warning">Check</span> Checker agent: “Intro to no gi” also appears under Nage in your PDF.</div>
+        </div>
+
+        <div className="trust">
+          <span>✓ Nothing published without your approval</span>
+          <span>✓ Each school's data is private</span>
+          <span>✓ Under a cent of AI per import</span>
+        </div>
       </section>
       <section className="landing-form">
         <form className="card auth stack" onSubmit={submit}>

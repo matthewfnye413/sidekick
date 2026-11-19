@@ -5,7 +5,9 @@
 
 from __future__ import annotations
 
+import asyncio
 import os
+import uuid
 import time
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
@@ -47,19 +49,23 @@ app.add_middleware(
 
 # Turn agent/database failures into readable JSON errors. (Handlers for specific exception
 # types run inside the CORS middleware, so the browser sees the message, not "Failed to fetch".)
+def friendly_error(exc: Exception) -> str:
+    if isinstance(exc, UsageLimitExceeded):
+        return "The AI run hit its safety limit and was stopped before finishing. Try a smaller file or class."
+    if isinstance(exc, ModelHTTPError) and exc.status_code in (401, 403):
+        return "The AI service rejected SideKick's API key. The site owner needs to check the server's PORTKEY_API_KEY."
+    if isinstance(exc, ModelHTTPError) and "content_filter" in str(exc.body):
+        return ("The AI provider's safety filter blocked this file. It may contain text aimed at manipulating an AI. "
+                "Check the document, remove anything that isn't curriculum, and upload it again.")
+    if isinstance(exc, DBError):
+        return str(exc)
+    return "The AI service had a problem finishing this request. Please try again."
+
+
 @app.exception_handler(AgentRunError)
 async def agent_error(request: Request, exc: AgentRunError):
-    if isinstance(exc, UsageLimitExceeded):
-        msg = "The AI run hit its safety limit and was stopped before finishing. Try a smaller file or class."
-    elif isinstance(exc, ModelHTTPError) and exc.status_code in (401, 403):
-        msg = "The AI service rejected SideKick's API key. The site owner needs to check the server's PORTKEY_API_KEY."
-    elif isinstance(exc, ModelHTTPError) and "content_filter" in str(exc.body):
-        msg = ("The AI provider's safety filter blocked this file. It may contain text aimed at manipulating an AI. "
-               "Check the document, remove anything that isn't curriculum, and upload it again.")
-    else:
-        msg = "The AI service had a problem finishing this request. Please try again."
     print(f"Agent error on {request.url.path}: {exc!r}")
-    return JSONResponse(status_code=502, content={"detail": msg})
+    return JSONResponse(status_code=502, content={"detail": friendly_error(exc)})
 
 
 @app.exception_handler(DBError)
@@ -144,17 +150,52 @@ async def create_import(school_id: str, program_name: str = Form(...), read_layo
 
     await require_staff_with_budget(school_id, who)
 
-    meter = UsageMeter()
+    # Run the agents in the background so the app can show each step live (GET /api/jobs/{id}).
+    _prune_jobs()
+    job_id = uuid.uuid4().hex
+    job = JOBS[job_id] = {"user": who.id, "status": "running", "steps": [], "result": None, "error": None,
+                          "created": time.time()}
     pdfs = [data for name, data in blobs if name.lower().endswith(".pdf")] if read_layout else None
-    result = await run_import(text, program_name.strip()[:80], meter=meter, pdfs=pdfs)
-    await record_usage(who, school_id, "import", result.usage)
+    # Keep a reference so the task isn't garbage-collected mid-run.
+    job["task"] = asyncio.create_task(_run_import_job(job, who, school_id, program_name.strip()[:80], blobs, text, pdfs))
+    return {"job_id": job_id}
 
-    row = await who.db.insert("imports", {
-        "school_id": school_id, "program_name": program_name.strip()[:80],
-        "files": [name for name, _ in blobs], "draft": result.draft.model_dump(),
-        "issues": [i.model_dump() for i in result.issues], "summary": result.summary,
-        "usage": {**result.usage, "revised": result.revised, "read_layout": bool(pdfs)}})
-    return row
+
+# In-memory job table (one server instance). Jobs are only visible to the user who started them.
+JOBS: dict[str, dict] = {}
+
+
+def _prune_jobs() -> None:
+    cutoff = time.time() - 3600
+    for k in [k for k, j in JOBS.items() if j["created"] < cutoff]:
+        del JOBS[k]
+
+
+async def _run_import_job(job: dict, who: Caller, school_id: str, program: str,
+                          blobs: list[tuple[str, bytes]], text: str, pdfs: list[bytes] | None) -> None:
+    def on_change(steps: list[dict]) -> None:
+        job["steps"] = steps
+
+    try:
+        result = await run_import(text, program, meter=UsageMeter(), pdfs=pdfs, on_change=on_change)
+        await record_usage(who, school_id, "import", result.usage)
+        job["result"] = await who.db.insert("imports", {
+            "school_id": school_id, "program_name": program,
+            "files": [name for name, _ in blobs], "draft": result.draft.model_dump(),
+            "issues": [i.model_dump() for i in result.issues], "summary": result.summary,
+            "usage": {**result.usage, "revised": result.revised, "read_layout": bool(pdfs)}})
+        job["status"] = "done"
+    except Exception as exc:  # noqa: BLE001 — every failure must reach the user as a message
+        print(f"Import job failed: {exc!r}")
+        job["error"], job["status"] = friendly_error(exc), "error"
+
+
+@app.get("/api/jobs/{job_id}")
+async def job_status(job_id: str, who: Caller = Depends(caller)):
+    job = JOBS.get(job_id)
+    if not job or job["user"] != who.id:
+        raise HTTPException(404, "No such job (it may have expired).")
+    return {k: job[k] for k in ("status", "steps", "result", "error")}
 
 
 class PlanRequest(BaseModel):

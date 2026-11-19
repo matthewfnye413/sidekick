@@ -1,5 +1,6 @@
 import { useMemo, useState } from 'react'
 import { fmtTokens, fmtUsd, q, supabase } from '../supabase'
+import AgentSteps from './AgentSteps'
 
 const SEV_ORDER = { error: 0, warning: 1, info: 2 }
 const SEV_LABEL = { error: 'Fix', warning: 'Check', info: 'FYI' }
@@ -131,6 +132,12 @@ function ImportReview({ imp, onClose }) {
               ))}
             </ul>
           </div>
+          {u.trace?.length > 0 && (
+            <div className="card">
+              <h3>How SideKick built this</h3>
+              <AgentSteps steps={u.trace} />
+            </div>
+          )}
           <div className="card">
             <h3>What this import cost</h3>
             <p className="muted">
