@@ -1,0 +1,491 @@
+[
+  {
+    "id": "adult",
+    "name": "Adult",
+    "belts": [
+      {
+        "id": "white",
+        "name": "White Belt",
+        "color": "#f5f5f5"
+      },
+      {
+        "id": "blue",
+        "name": "Blue Belt",
+        "color": "#2563eb",
+        "timeframe": "18 months",
+        "requirements": [
+          {
+            "category": "Strikes (modified)",
+            "items": [
+              "Jab",
+              "Cross",
+              "Hook/Check Hook",
+              "Uppercut",
+              "Shuto variations",
+              "Nukite",
+              "Metsubushi",
+              "Elbows",
+              "Toho"
+            ]
+          },
+          {
+            "category": "Kicks",
+            "items": [
+              "Kin Geri",
+              "Mae Geri",
+              "Yoko Geri",
+              "Mawashi Geri",
+              "Ushiro Geri",
+              "Knees"
+            ]
+          },
+          {
+            "category": "Blocks (modified)",
+            "items": [
+              "Chudan Uchi Uke",
+              "Chudan Soto Uke",
+              "Jodan Uke",
+              "Gedan Barai",
+              "Shuto Mawashi Uke",
+              "Knee/shin block"
+            ]
+          },
+          {
+            "category": "Ukemi",
+            "items": [
+              "Forward Roll",
+              "Back Roll",
+              "Back Breakfall",
+              "Front Breakfall",
+              "Side Breakfall"
+            ]
+          },
+          {
+            "category": "Nage",
+            "items": [
+              "Osoto Gari",
+              "Deashi Harai",
+              "Kouchi Gari",
+              "Ouchi Gari",
+              "Ogoshi",
+              "Tsurikomi Goshi",
+              "Ippon Seionage"
+            ]
+          },
+          {
+            "category": "Kansetsu",
+            "items": [
+              "Ikkyo",
+              "Nikyo",
+              "Sankyo",
+              "Ude Garame (figure 4)",
+              "Shiho Nage",
+              "Standing arm bar",
+              "Hiza kansetsu"
+            ]
+          },
+          {
+            "category": "Goshinjutsu — Wrist grab series (escapes and locks)",
+            "items": [
+              "Front double x 2",
+              "Straight",
+              "Cross",
+              "Straight turned over",
+              "Rear double",
+              "Cross turned over"
+            ]
+          },
+          {
+            "category": "Goshinjutsu — Grabs/attacks",
+            "items": [
+              "Chokes – front, side, rear",
+              "Single collar",
+              "Double collar",
+              "Mugger's hold",
+              "Headlock",
+              "Bear hugs – front under, front over, rear under, rear over, side under, side over"
+            ]
+          },
+          {
+            "category": "Ne Waza — Solo drills",
+            "items": [
+              "Shrimp",
+              "Reverse Shrimp",
+              "Thread the Needle",
+              "Technical Standup"
+            ]
+          },
+          {
+            "category": "Ne Waza — Positions",
+            "items": [
+              "Mount (variations)",
+              "Guard (variations)",
+              "Side Control",
+              "Rear Mount",
+              "Turtle",
+              "North/South",
+              "Kesa Gatame"
+            ]
+          },
+          {
+            "category": "Ne Waza — Passes",
+            "items": [
+              "Mount Pass – trap and roll / shrimp to half guard",
+              "Guard Pass – knee to tailbone / stack / roll",
+              "Side Pass – knee across belly / hip switch",
+              "Turtle Pass – pull to seat, hook to rear mount / neck crank roll",
+              "North/South",
+              "Rear Mount – bridge and walk",
+              "Sweeps",
+              "Half guard pass to full or back",
+              "Side escapes",
+              "Half guard escapes",
+              "Back Control",
+              "Kesa Gatame"
+            ]
+          },
+          {
+            "category": "Ne Waza — Submissions",
+            "items": [
+              "Cross choke",
+              "Rear naked choke",
+              "Guillotine",
+              "Paper cutter",
+              "Bow and arrow",
+              "Key lock",
+              "Kimura",
+              "Straight arm bar",
+              "Triangle"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "purple",
+        "name": "Purple Belt",
+        "color": "#7c3aed",
+        "timeframe": "1 year",
+        "requirements": [
+          {
+            "category": "Ne Waza",
+            "items": [
+              "Additional submissions/defense",
+              "More free flow between positions",
+              "Incorporate stand up",
+              "Darce Anaconda",
+              "Ezekiel",
+              "Intro to no gi"
+            ]
+          },
+          {
+            "category": "Nage",
+            "items": [
+              "Harai Goshi",
+              "Hane Goshi",
+              "Tomoe Nage",
+              "Morote",
+              "Taiotoshi",
+              "Seiotoshi",
+              "Yuki-Ore",
+              "Kani Basami",
+              "Intro to no gi",
+              "Striking and defending"
+            ]
+          },
+          {
+            "category": "Goshinjutsu",
+            "items": [
+              "Sleeve grabs",
+              "Shoulder grabs",
+              "Guillotine",
+              "Roundhouse punches",
+              "Collar grab and punch",
+              "Hair grabs",
+              "Kick defense"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "green",
+        "name": "Green Belt",
+        "color": "#16a34a",
+        "timeframe": "1 year",
+        "requirements": [
+          {
+            "category": "Nage",
+            "items": [
+              "Irime Nage variations",
+              "Uki Waza",
+              "Yoko Wakare",
+              "Tani Otoshi",
+              "Sumi Gaeshi",
+              "Sukui Nage",
+              "Kosoto Gari",
+              "Hiza Guruma",
+              "Countering",
+              "Left side throws"
+            ]
+          },
+          {
+            "category": "Goshinjutsu",
+            "items": [
+              "Full Nelson",
+              "Chicken Wing",
+              "Multiple attackers",
+              "Knife/stick/gun defense"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "brown",
+        "name": "Brown Belt",
+        "color": "#78350f",
+        "timeframe": "1–2 years",
+        "requirements": [
+          {
+            "category": "Ne Waza",
+            "items": [
+              "Improvements on submissions/defense/positions"
+            ]
+          },
+          {
+            "category": "Goshinjutsu",
+            "items": [
+              "Wall defense",
+              "Taiatari drilling",
+              "Heiho",
+              "Flow drills (Hubud)"
+            ]
+          },
+          {
+            "category": "Nage",
+            "items": [
+              "Uchi Mata",
+              "Tama Guruma",
+              "Soto Makikomi",
+              "Oguruma",
+              "Sode Tsurikomi",
+              "Kata Guruma",
+              "Mizu Waza (as Kata or Tama bailout)",
+              "Kouchi Gake",
+              "Kosoto Gake",
+              "Osoto Guruma",
+              "Ashi Guruma",
+              "Yama Arashi"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "black",
+        "name": "Black Belt",
+        "color": "#111111",
+        "timeframe": "1–2 years",
+        "requirements": [
+          {
+            "category": "Mastery",
+            "items": [
+              "Finding throws from non-standard positions",
+              "Combinations",
+              "Advanced understanding of finding and creating kuzushi",
+              "Counters or reversals to all throws",
+              "Command of ne waza positions, submissions, transitions, style development"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  {
+    "id": "kids",
+    "name": "Kids",
+    "belts": [
+      {
+        "id": "white",
+        "name": "White Belt",
+        "color": "#f5f5f5"
+      },
+      {
+        "id": "yellow",
+        "name": "Yellow Belt",
+        "color": "#facc15",
+        "timeframe": "1 year",
+        "requirements": [
+          {
+            "category": "Strikes (modified)",
+            "items": [
+              "Jab",
+              "Cross",
+              "Hook/Check Hook",
+              "Uppercut"
+            ]
+          },
+          {
+            "category": "Kicks",
+            "items": [
+              "Kin Geri",
+              "Mae Geri",
+              "Yoko Geri",
+              "Mawashi Geri",
+              "Ushiro Geri",
+              "Knees"
+            ]
+          },
+          {
+            "category": "Blocks (modified)",
+            "items": [
+              "Chudan Uchi Uke",
+              "Chudan Soto Uke",
+              "Jodan Uke",
+              "Gedan Barai",
+              "Shuto Mawashi Uke"
+            ]
+          },
+          {
+            "category": "Ukemi",
+            "items": [
+              "Forward Roll",
+              "Back Roll",
+              "Back Breakfall",
+              "Front Breakfall",
+              "Side Breakfall"
+            ]
+          },
+          {
+            "category": "Nage",
+            "items": [
+              "Osoto Gari",
+              "Deashi Harai",
+              "Kouchi Gari",
+              "Ouchi Gari",
+              "Ogoshi",
+              "Ippon Seionage"
+            ]
+          },
+          {
+            "category": "Kansetsu",
+            "items": [
+              "Ikkyo",
+              "Nikyo",
+              "Sankyo",
+              "Ude Garame (figure 4)",
+              "Shiho Nage",
+              "Standing arm bar"
+            ]
+          },
+          {
+            "category": "Goshinjutsu — Wrist grab series (escapes and locks)",
+            "items": [
+              "Front double x 2",
+              "Straight",
+              "Cross",
+              "Straight turned over",
+              "Rear double",
+              "Cross turned over"
+            ]
+          },
+          {
+            "category": "Goshinjutsu — Grabs/attacks",
+            "items": [
+              "Chokes – front, side, rear",
+              "Single collar",
+              "Mugger's hold",
+              "Headlock",
+              "Bear hugs – front under, front over, rear under, rear over, side under, side over"
+            ]
+          },
+          {
+            "category": "Ne Waza — Solo drills",
+            "items": [
+              "Shrimp",
+              "Reverse Shrimp",
+              "Thread the Needle",
+              "Technical Standup"
+            ]
+          },
+          {
+            "category": "Ne Waza — Positions",
+            "items": [
+              "Mount (variations)",
+              "Guard (variations)",
+              "Side Control",
+              "Rear Mount",
+              "Turtle"
+            ]
+          },
+          {
+            "category": "Ne Waza — Passes",
+            "items": [
+              "Mount Pass – trap and roll / shrimp to half guard",
+              "Guard Pass – knee to tailbone",
+              "Side Pass – knee across belly",
+              "Turtle Pass – pull to seat, hook to rear mount",
+              "Rear Mount – bridge and walk",
+              "Sweeps – scissor, pendulum, hip bump",
+              "Half guard pass to full or back",
+              "Back Control"
+            ]
+          },
+          {
+            "category": "Ne Waza — Submissions",
+            "items": [
+              "Rear naked choke",
+              "Paper cutter",
+              "Key lock",
+              "Kimura",
+              "Straight arm bar"
+            ]
+          }
+        ]
+      },
+      {
+        "id": "orange",
+        "name": "Orange Belt",
+        "color": "#fb923c",
+        "timeframe": "1 year",
+        "requirements": [
+          {
+            "category": "Ne Waza",
+            "items": [
+              "Additional submissions/defense",
+              "More free flow between positions",
+              "Incorporate stand up",
+              "Darce Anaconda",
+              "Ezekiel",
+              "Intro to no gi"
+            ]
+          },
+          {
+            "category": "Nage",
+            "items": [
+              "Harai Goshi",
+              "Hane Goshi",
+              "Tomoe Nage",
+              "Morote",
+              "Taiotoshi",
+              "Seiotoshi",
+              "Yuki-Ore",
+              "Kani Basami",
+              "Intro to no gi",
+              "Striking and defending"
+            ]
+          },
+          {
+            "category": "Goshinjutsu",
+            "items": [
+              "Sleeve grabs",
+              "Shoulder grabs",
+              "Guillotine",
+              "Roundhouse punches",
+              "Collar grab and punch",
+              "Hair grabs",
+              "Kick defense"
+            ]
+          }
+        ]
+      }
+    ]
+  }
+]

@@ -1,0 +1,18 @@
+# Secrets
+.env
+.env.*
+!.env.example
+
+# Pilot schools' curricula are their property — never commit them
+pilot_files/
+
+# Run logs and generated imports (may contain curriculum content)
+output/
+
+# Tooling
+__pycache__/
+*.pyc
+.venv/
+node_modules/
+frontend/dist/
+.claude/

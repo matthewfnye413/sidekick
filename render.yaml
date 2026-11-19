@@ -1,0 +1,16 @@
+# Render blueprint for the SideKick API (the agents).
+services:
+  - type: web
+    name: sidekick-api
+    runtime: python
+    plan: starter            # always on, so graders never hit a sleeping server
+    buildCommand: pip install -r requirements.txt
+    startCommand: uvicorn backend.main:app --host 0.0.0.0 --port $PORT
+    healthCheckPath: /api/health
+    envVars:
+      - key: PYTHON_VERSION
+        value: 3.12.8
+      - key: PORTKEY_API_KEY
+        sync: false          # entered by hand in the Render dashboard, never committed
+      - key: ALLOWED_ORIGINS
+        value: https://sidekick-dojo.netlify.app
