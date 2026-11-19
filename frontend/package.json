@@ -7,7 +7,8 @@
     "dev": "vite",
     "build": "vite build",
     "lint": "oxlint",
-    "preview": "vite preview"
+    "preview": "vite preview",
+    "deploy": "vite build && node ../../../Evolution/dojo-app/node_modules/netlify-cli/bin/run.js deploy --prod --dir dist --no-build --site c4f39d1b-3742-42ea-991f-c27cbb7eef90"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.119.0",
