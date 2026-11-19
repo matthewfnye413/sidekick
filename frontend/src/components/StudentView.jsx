@@ -67,11 +67,16 @@ function StudentView({ school }) {
 
 function Checklist({ student, program }) {
   const [done, setDone] = useState(null)
+  const [byCoach, setByCoach] = useState(new Set())
   const next = program.ranks.find((r) => r.sort === student.current_rank_sort + 1)
 
   useEffect(() => {
-    q(supabase.from('progress').select('rank_id,item_key').eq('student_id', student.id))
-      .then((rows) => setDone(new Set(rows.map((r) => `${r.rank_id}|${r.item_key}`))))
+    q(supabase.from('progress').select('rank_id,item_key,checked_by').eq('student_id', student.id))
+      .then((rows) => {
+        setDone(new Set(rows.map((r) => `${r.rank_id}|${r.item_key}`)))
+        // Items checked by someone other than this family's account were checked by an instructor.
+        setByCoach(new Set(rows.filter((r) => r.checked_by && r.checked_by !== student.account_id).map((r) => `${r.rank_id}|${r.item_key}`)))
+      })
   }, [student.id])
 
   const toggle = async (key) => {
@@ -103,7 +108,12 @@ function Checklist({ student, program }) {
             <ul className="checklist">
               {c.items.map((i) => {
                 const k = keyOf(c.name, i)
-                return <li key={k}><label><input type="checkbox" checked={done.has(`${next.id}|${k}`)} onChange={() => toggle(k)} /> {i}</label></li>
+                return (
+                  <li key={k}><label>
+                    <input type="checkbox" checked={done.has(`${next.id}|${k}`)} onChange={() => toggle(k)} /> {i}
+                    {byCoach.has(`${next.id}|${k}`) && done.has(`${next.id}|${k}`) && <span className="pill info">coach</span>}
+                  </label></li>
+                )
               })}
             </ul>
           </div>
