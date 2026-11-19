@@ -1,5 +1,5 @@
 // Rank certificates live in a private storage bucket at <school>/<student>/<rank>.pdf.
-// Opening one creates a short-lived signed link, so files are never publicly reachable.
+// Files are never publicly reachable: opening one downloads it with the signed-in user's session.
 import { q, supabase } from './supabase'
 
 const BUCKET = 'certificates'
@@ -14,12 +14,16 @@ export async function uploadCertificate(schoolId, studentId, rankId, file) {
   await q(supabase.from('certificates').upsert({ student_id: studentId, rank_id: rankId, path }))
 }
 
+// Fetch the PDF with the user's own session and show it in the browser's PDF viewer (not as a download).
 export async function openCertificate(path) {
   const tab = window.open('', '_blank') // open first so pop-up blockers allow it
-  const { data, error } = await supabase.storage.from(BUCKET).createSignedUrl(path, 300)
+  if (tab) tab.document.write('<p style="font-family:sans-serif;padding:24px">Opening certificate…</p>')
+  const { data, error } = await supabase.storage.from(BUCKET).download(path)
   if (error) { tab?.close(); throw new Error(error.message) }
-  if (tab) tab.location = data.signedUrl
-  else window.location.assign(data.signedUrl)
+  const url = URL.createObjectURL(new Blob([data], { type: 'application/pdf' }))
+  if (tab) tab.location.href = url
+  else window.location.assign(url)
+  setTimeout(() => URL.revokeObjectURL(url), 60_000)
 }
 
 export async function removeCertificate(cert) {
