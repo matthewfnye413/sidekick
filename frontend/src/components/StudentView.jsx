@@ -95,7 +95,7 @@ function Checklist({ student, program }) {
     <div className="card" style={{ marginTop: 14 }}>
       <div className="row"><span className="belt-swatch" style={{ background: next.color }} /><h2 style={{ margin: 0 }}>Working toward {next.name}</h2></div>
       <div className="progress"><div style={{ width: `${(count / total) * 100}%` }} /></div>
-      <p className="muted">{count} of {total} practiced{next.timeframe ? ` · ${next.timeframe}` : ''}</p>
+      <p className="muted">{count} of {total} practiced</p>
       <div className="rank-body" style={{ padding: 0 }}>
         {next.requirements.map((c) => (
           <div key={c.name} className="cat">
@@ -132,7 +132,6 @@ function RankPath({ student, program }) {
             <summary>
               <span className="belt-swatch" style={{ background: r.color }} /><strong>{r.name}</strong>
               {status && <span className={`pill ${status === 'Earned' ? 'ok' : 'error'}`}>{status}</span>}
-              <span className="muted">{r.timeframe}</span>
             </summary>
             <div className="rank-body">
               {r.requirements.map((c) => (
