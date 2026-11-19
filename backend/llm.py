@@ -36,7 +36,8 @@ def get_model() -> OpenAIResponsesModel:
     global _model
     if _model is None:
         # Tolerate stray whitespace/quotes from pasting the key into a hosting dashboard.
-        key = (os.getenv("PORTKEY_API_KEY") or "").strip().strip("'\"").strip()
+        key = (os.getenv("PORTKEY_API_KEY") or "").strip()
+        key = key.removeprefix("PORTKEY_API_KEY=").strip().strip("'\"").strip()  # whole .env line pasted
         print(f"PORTKEY_API_KEY loaded: {len(key)} characters")  # length only, never the key
         if not key:
             raise RuntimeError("PORTKEY_API_KEY is not set (put it in .env here or one folder up).")
