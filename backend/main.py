@@ -11,9 +11,11 @@ from collections import defaultdict, deque
 from contextlib import asynccontextmanager
 
 import httpx
-from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, UploadFile
+from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
+from pydantic_ai.exceptions import AgentRunError, ModelHTTPError, UsageLimitExceeded
 
 from .agents.curriculum import run_import
 from .agents.planner import run_planner
@@ -41,6 +43,26 @@ app.add_middleware(
     allow_methods=["GET", "POST"],
     allow_headers=["Authorization", "Content-Type"],
 )
+
+
+# Turn agent/database failures into readable JSON errors. (Handlers for specific exception
+# types run inside the CORS middleware, so the browser sees the message, not "Failed to fetch".)
+@app.exception_handler(AgentRunError)
+async def agent_error(request: Request, exc: AgentRunError):
+    if isinstance(exc, UsageLimitExceeded):
+        msg = "The AI run hit its safety limit and was stopped before finishing. Try a smaller file or class."
+    elif isinstance(exc, ModelHTTPError) and exc.status_code in (401, 403):
+        msg = "The AI service rejected SideKick's API key. The site owner needs to check the server's PORTKEY_API_KEY."
+    else:
+        msg = "The AI service had a problem finishing this request. Please try again."
+    print(f"Agent error on {request.url.path}: {exc!r}")
+    return JSONResponse(status_code=502, content={"detail": msg})
+
+
+@app.exception_handler(DBError)
+async def db_error(request: Request, exc: DBError):
+    return JSONResponse(status_code=exc.status if exc.status < 500 else 502, content={"detail": str(exc)})
+
 
 MAX_UPLOAD_BYTES = 8 * 1024 * 1024  # 8 MB per file
 MAX_FILES = 6
