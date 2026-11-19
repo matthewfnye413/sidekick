@@ -1,0 +1,194 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>SideKick flyer</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+<style>
+  @page { size: Letter; margin: 0; }
+  :root { --ink: #14161c; --ink2: #23262f; --red: #c8102e; --red-soft: #fbe9ec; --paper: #f6f5f2; --line: #e4e2dc; --muted: #5b6170; --ok: #15803d; }
+  * { box-sizing: border-box; }
+  html, body { margin: 0; }
+  body { font-family: Inter, sans-serif; color: var(--ink); -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  .page { width: 8.5in; height: 11in; display: flex; flex-direction: column; background: #fff; overflow: hidden; }
+
+  /* Logo */
+  .logo { display: inline-flex; align-items: center; gap: 10px; }
+  .logo svg { width: 46px; height: 46px; }
+  .word { font-family: Oswald, sans-serif; font-weight: 700; font-size: 40px; line-height: 1; display: inline-flex; align-items: center; letter-spacing: .01em; }
+  .word .side { color: #fff; }
+  .word .kick { color: var(--red); font-style: italic; transform: skewX(-6deg); display: inline-flex; align-items: center; }
+  .speed { display: inline-flex; flex-direction: column; gap: 4px; margin: 0 5px 0 6px; }
+  .speed i { display: block; height: 3.5px; border-radius: 2px; background: var(--red); }
+  .speed i:nth-child(1) { width: 12px; margin-left: 7px; } .speed i:nth-child(2) { width: 19px; } .speed i:nth-child(3) { width: 10px; margin-left: 9px; }
+
+  /* Hero */
+  .hero { background: var(--ink); color: #fff; padding: 20px 40px 18px; display: grid; grid-template-columns: 1.15fr 1fr; gap: 26px; align-items: center; }
+  .hero .tagline { color: #aeb2bc; font-size: 12px; letter-spacing: .06em; text-transform: uppercase; margin: 8px 0 10px; }
+  .hero h1 { font-family: Oswald, sans-serif; font-weight: 700; font-size: 34px; line-height: 1.05; margin: 0 0 4px; }
+  .hero .sub { font-family: Oswald, sans-serif; font-weight: 500; font-size: 20px; color: #fff; margin: 0 0 10px; }
+  .hero h1 em { color: var(--red); font-style: normal; }
+  .hero p { margin: 0; color: #d4d7de; font-size: 13px; line-height: 1.45; }
+
+  .preview { background: #fff; color: #1f2937; border-radius: 12px; padding: 14px 16px; box-shadow: 0 10px 30px rgba(0,0,0,.4); }
+  .p-head { display: flex; align-items: center; gap: 8px; font-family: Oswald, sans-serif; font-weight: 600; font-size: 16px; }
+  .belt { width: 30px; height: 10px; border-radius: 3px; background: #7c3aed; }
+  .p-pct { margin-left: auto; font: 500 12px Inter; color: #6b7280; }
+  .bar { height: 7px; background: #ece9e3; border-radius: 4px; overflow: hidden; margin: 8px 0; }
+  .bar div { width: 70%; height: 100%; background: var(--red); }
+  .items { display: flex; flex-wrap: wrap; gap: 5px; font-size: 11.5px; margin-bottom: 9px; }
+  .items span { border: 1px solid var(--line); border-radius: 5px; padding: 2px 7px; color: #6b7280; }
+  .items span.on { background: #e7f6ec; border-color: #bfe3cb; color: var(--ok); }
+  .flag { font-size: 11.5px; border-top: 1px solid #ece9e3; padding-top: 8px; color: #374151; }
+  .pill { display: inline-block; font-weight: 700; font-size: 10.5px; padding: 1px 7px; border-radius: 999px; background: #fdf3e2; color: #b45309; margin-right: 4px; }
+
+  /* Steps strip */
+  .steps { display: grid; grid-template-columns: repeat(3, 1fr); background: var(--paper); border-bottom: 1px solid var(--line); }
+  .step { padding: 11px 22px; display: flex; gap: 10px; align-items: flex-start; font-size: 12.5px; color: var(--muted); }
+  .step + .step { border-left: 1px solid var(--line); }
+  .num { width: 24px; height: 24px; border-radius: 50%; background: var(--red); color: #fff; display: grid; place-items: center; font: 700 12px Inter; flex-shrink: 0; }
+  .step strong { color: var(--ink); display: block; font-size: 13.5px; }
+
+  /* Features */
+  .features { padding: 12px 40px 2px; display: grid; grid-template-columns: 1fr 1fr; gap: 9px 28px; }
+  .feat { display: flex; gap: 11px; }
+  .check { width: 22px; height: 22px; border-radius: 6px; background: var(--red-soft); color: var(--red); display: grid; place-items: center; font-weight: 800; font-size: 13px; flex-shrink: 0; margin-top: 2px; }
+  .feat h3 { font-family: Oswald, sans-serif; font-weight: 600; font-size: 17px; margin: 0 0 3px; letter-spacing: .01em; }
+  .feat p { margin: 0; font-size: 12px; line-height: 1.4; color: var(--muted); }
+
+  /* Comparison */
+  .why { margin: 10px 40px 14px; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  .why h2 { font-family: Oswald, sans-serif; font-size: 16px; margin: 0; padding: 7px 16px; background: var(--paper); border-bottom: 1px solid var(--line); }
+  .why table { width: 100%; border-collapse: collapse; font-size: 12px; }
+  .why th, .why td { padding: 5px 16px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: top; }
+  .why tr:last-child td { border-bottom: none; }
+  .why th { font: 700 10.5px Inter; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); }
+  .why td:first-child { font-weight: 600; width: 26%; }
+  .why td:nth-child(2) { color: var(--muted); width: 34%; }
+  .why td:nth-child(3) { color: var(--ink); font-weight: 500; }
+  .why .sk { color: var(--red); }
+
+  /* CTA */
+  .cta { margin-top: auto; background: var(--red); color: #fff; padding: 14px 40px; display: flex; align-items: center; gap: 22px; }
+  .cta .qr { background: #fff; padding: 6px; border-radius: 8px; width: 92px; height: 92px; flex-shrink: 0; }
+  .cta .qr img { width: 100%; height: 100%; display: block; }
+  .cta h2 { font-family: Oswald, sans-serif; font-size: 26px; margin: 0 0 4px; }
+  .cta .url { font: 700 17px Inter; letter-spacing: .01em; }
+  .cta p { margin: 4px 0 0; font-size: 12.5px; color: #ffe1e6; }
+  .foot { background: var(--ink); color: #aeb2bc; font-size: 11.5px; padding: 9px 40px; display: flex; justify-content: space-between; }
+  .foot strong { color: #fff; font-weight: 600; }
+
+  /* Ease-of-use + embedding */
+  .easy { display: flex; gap: 8px; margin-top: 10px; flex-wrap: wrap; }
+  .easy span { font: 600 11.5px Inter; color: #fff; border: 1px solid #3a3e4a; border-radius: 999px; padding: 3px 10px; }
+  .easy span::before { content: "✓ "; color: var(--red); }
+  .steps-title { background: var(--paper); font: 700 11px Inter; letter-spacing: .08em; text-transform: uppercase; color: var(--red); padding: 9px 40px 0; }
+  .step em { font-style: normal; font-weight: 700; color: var(--red); font-size: 11.5px; margin-right: 3px; }
+  .embed { margin: 14px 40px 16px; display: grid; grid-template-columns: 1.15fr 1fr; gap: 18px; align-items: center; background: var(--ink); color: #fff; border-radius: 12px; padding: 14px 18px; }
+  .embed h2 { font-family: Oswald, sans-serif; font-size: 19px; margin: 0 0 5px; }
+  .embed p { margin: 0 0 8px; font-size: 11.8px; line-height: 1.45; color: #d4d7de; }
+  .embed p strong { color: #fff; }
+  .builders { display: flex; flex-wrap: wrap; gap: 5px; }
+  .builders span { font: 600 10.5px Inter; background: #2a2e38; color: #e5e7eb; border-radius: 5px; padding: 2px 8px; }
+  .browser { background: #fff; border-radius: 8px; overflow: hidden; color: #1f2937; position: relative; padding-bottom: 18px; }
+  .b-bar { background: #e9e7e2; display: flex; align-items: center; gap: 4px; padding: 5px 8px; }
+  .b-bar i { width: 7px; height: 7px; border-radius: 50%; background: #c9c6bf; }
+  .b-bar span { margin-left: 8px; font: 500 9.5px Inter; color: #6b7280; background: #fff; border-radius: 4px; padding: 1px 8px; }
+  .b-nav { display: flex; align-items: center; gap: 9px; padding: 6px 10px; font: 500 9.5px Inter; color: #374151; border-bottom: 1px solid #ece9e3; }
+  .b-nav b { font: 700 10px Inter; margin-right: auto; }
+  .b-btn { background: var(--red); color: #fff; border-radius: 4px; padding: 3px 8px; font-weight: 700; box-shadow: 0 0 0 3px rgba(200,16,46,.25); }
+  .b-body { display: flex; gap: 8px; padding: 8px 10px; }
+  .b-hero { width: 46%; height: 34px; border-radius: 4px; background: #ece9e3; }
+  .b-lines { flex: 1; display: flex; flex-direction: column; gap: 5px; padding-top: 3px; }
+  .b-lines i { height: 5px; border-radius: 3px; background: #ece9e3; } .b-lines i:nth-child(2) { width: 80%; } .b-lines i:nth-child(3) { width: 60%; }
+  .b-arrow { position: absolute; right: 10px; bottom: 3px; font: 700 9.5px Inter; color: var(--red); }
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <symbol id="sk-mark" viewBox="0 0 100 100">
+    <rect width="100" height="100" rx="22" fill="#c8102e" />
+    <path d="M12 40 H88" stroke="#fff" stroke-width="11" stroke-linecap="round" />
+    <rect x="38" y="29" width="22" height="22" rx="5" fill="#fff" />
+    <path d="M44 51 L34 82" stroke="#fff" stroke-width="9" stroke-linecap="round" />
+    <path d="M55 51 L86 72" stroke="#fff" stroke-width="9" stroke-linecap="round" />
+    <path d="M62 82 L74 88 M54 70 L60 74" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".75" />
+  </symbol>
+</svg>
+
+<div class="page">
+  <section class="hero">
+    <div>
+      <div class="logo">
+        <svg><use href="#sk-mark" /></svg>
+        <span class="word"><span class="side">SIDE</span><span class="kick"><span class="speed"><i></i><i></i><i></i></span>KICK</span></span>
+      </div>
+      <div class="tagline">Every coach needs a sidekick.</div>
+      <h1>Your curriculum, online in <em>minutes</em>.</h1>
+      <div class="sub">Not a weekend of data entry.</div>
+      <p>Upload the curriculum PDFs you already hand out. SideKick's AI turns them into rank-by-rank checklists
+        for every student, checks its own work, and waits for your approval.</p>
+      <div class="easy"><span>No setup calls</span><span>No data entry</span><span>No app to install</span></div>
+    </div>
+    <div class="preview">
+      <div class="p-head"><span class="belt"></span>Working toward Purple Belt<span class="p-pct">16 / 23</span></div>
+      <div class="bar"><div></div></div>
+      <div class="items">
+        <span class="on">✓ Harai Goshi</span><span class="on">✓ Hane Goshi</span><span class="on">✓ Tomoe Nage</span>
+        <span>Taiotoshi</span><span class="on">✓ Sleeve grabs</span><span>Kick defense</span><span class="on">✓ Ezekiel</span>
+      </div>
+      <div class="flag"><span class="pill">CHECK</span>Checker agent: “Intro to no gi” also appears under Nage in your PDF.</div>
+    </div>
+  </section>
+
+  <div class="steps-title">Up and running in about 10 minutes</div>
+  <section class="steps">
+    <div class="step"><span class="num">1</span><div><strong>Upload your PDFs</strong><em>~2 min</em> Two AI agents build and check your rank-by-rank checklists.</div></div>
+    <div class="step"><span class="num">2</span><div><strong>Review &amp; approve</strong><em>~5 min</em> Fix anything flagged. Students see only what you allow.</div></div>
+    <div class="step"><span class="num">3</span><div><strong>Add one button</strong><em>~2 min</em> SideKick walks you through it. No web designer needed.</div></div>
+  </section>
+
+  <section class="features">
+    <div class="feat"><span class="check">✓</span><div><h3>Built for how you actually teach</h3>
+      <p>Belts, kyu grades or numbered levels. Jujutsu, karate, Kali, BJJ. Your terminology and spelling, kept exactly as you wrote them.</p></div></div>
+    <div class="feat"><span class="check">✓</span><div><h3>You control curriculum access</h3>
+      <p>Students see what they've earned and what they're working on now. Unlock a higher rank for one student with a click.</p></div></div>
+    <div class="feat"><span class="check">✓</span><div><h3>Know who's ready to test</h3>
+      <p>One screen shows every student's progress to their next rank. Correct any checklist yourself and promote with one click.</p></div></div>
+    <div class="feat"><span class="check">✓</span><div><h3>Students and parents stay engaged</h3>
+      <p>Every student gets a checklist and progress bar on their phone. One login covers the whole family.</p></div></div>
+    <div class="feat"><span class="check">✓</span><div><h3>No training needed</h3>
+      <p>If you can attach a PDF to an email, you can run SideKick. Students sign in from any phone or browser.</p></div></div>
+    <div class="feat"><span class="check">✓</span><div><h3>Less than a penny per curriculum</h3>
+      <p>AI with a monthly budget cap your school controls. No surprise bills.</p></div></div>
+  </section>
+
+  <section class="embed">
+    <div class="embed-copy">
+      <h2>Fits right into the website you already have</h2>
+      <p><strong>No web designer needed.</strong> SideKick's built-in guide walks you step by step through adding a
+        <strong>Member Login</strong> button to your site, with instructions for your website builder. No rebuild,
+        nothing to move, and your billing stays as is. Want <strong>members.yourschool.com</strong>? The guide covers that too.</p>
+      <div class="builders"><span>Wix</span><span>Squarespace</span><span>WordPress</span><span>GoDaddy</span><span>Any site</span></div>
+    </div>
+    <div class="browser" aria-hidden="true">
+      <div class="b-bar"><i></i><i></i><i></i><span>yourschool.com</span></div>
+      <div class="b-nav"><b>Your School</b><span>Home</span><span>Classes</span><span>Contact</span><span class="b-btn">Member Login</span></div>
+      <div class="b-body"><div class="b-hero"></div><div class="b-lines"><i></i><i></i><i></i></div></div>
+      <div class="b-arrow">↑ SideKick shows you how, step by step</div>
+    </div>
+  </section>
+
+
+  <section class="cta">
+    <div class="qr"><img src="qr-sidekick.svg" alt="QR code to sidekick-dojo.netlify.app" /></div>
+    <div>
+      <h2>Try it free in 60 seconds</h2>
+      <div class="url">sidekick-dojo.netlify.app</div>
+      <p>Create an account, then click <strong>“Try it with a sample curriculum”</strong> and watch the agents work.</p>
+    </div>
+  </section>
+  <div class="foot"><span><strong>Veteran-owned.</strong> Built by a working chief instructor, for working instructors.</span><span>SideKick · Every coach needs a sidekick.</span></div>
+</div>
+</body>
+</html>

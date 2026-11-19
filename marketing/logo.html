@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<title>SideKick logo</title>
+<link href="https://fonts.googleapis.com/css2?family=Oswald:wght@500;600;700&family=Inter:wght@500;600&display=swap" rel="stylesheet" />
+<style>
+  :root { --ink: #14161c; --red: #c8102e; --paper: #f6f5f2; }
+  body { margin: 0; font-family: Inter, sans-serif; background: #fff; }
+  .sheet { display: grid; gap: 28px; padding: 32px; width: 900px; }
+  .tile { padding: 28px 32px; border-radius: 14px; display: flex; align-items: center; gap: 18px; }
+  .light { background: var(--paper); }
+  .dark { background: var(--ink); }
+  .label { font: 600 12px Inter; color: #6b7280; letter-spacing: .08em; text-transform: uppercase; margin-bottom: -18px; }
+
+  /* Wordmark */
+  .logo { display: inline-flex; align-items: center; gap: 14px; }
+  .logo svg.mark { width: 72px; height: 72px; flex-shrink: 0; }
+  .word { font-family: Oswald, 'Arial Narrow', sans-serif; font-weight: 700; font-size: 64px; line-height: 1; letter-spacing: .01em; display: inline-flex; align-items: center; }
+  .word .side { color: var(--ink); }
+  .dark .word .side { color: #fff; }
+  .word .kick { color: var(--red); display: inline-flex; align-items: center; font-style: italic; transform: skewX(-6deg); }
+  .word .speed { display: inline-flex; flex-direction: column; gap: 6px; margin: 0 6px 0 8px; }
+  .word .speed i { display: block; height: 5px; border-radius: 3px; background: var(--red); }
+  .word .speed i:nth-child(1) { width: 18px; margin-left: 10px; }
+  .word .speed i:nth-child(2) { width: 28px; }
+  .word .speed i:nth-child(3) { width: 14px; margin-left: 14px; }
+  .tag { font: 500 15px Inter; color: #6b7280; margin-top: 6px; letter-spacing: .02em; }
+  .dark .tag { color: #aeb2bc; }
+  .stack { display: flex; flex-direction: column; align-items: center; gap: 10px; text-align: center; }
+</style>
+</head>
+<body>
+<div class="sheet">
+  <svg width="0" height="0" style="position:absolute">
+    <!-- The mark: a belt knot whose right tail snaps out like a side kick, with motion lines. -->
+    <symbol id="sk-mark" viewBox="0 0 100 100">
+      <rect width="100" height="100" rx="22" fill="#c8102e" />
+      <path d="M12 40 H88" stroke="#fff" stroke-width="11" stroke-linecap="round" />
+      <rect x="38" y="29" width="22" height="22" rx="5" fill="#fff" />
+      <path d="M44 51 L34 82" stroke="#fff" stroke-width="9" stroke-linecap="round" />
+      <path d="M55 51 L86 72" stroke="#fff" stroke-width="9" stroke-linecap="round" />
+      <path d="M62 82 L74 88 M54 70 L60 74" stroke="#fff" stroke-width="4" stroke-linecap="round" opacity=".75" />
+    </symbol>
+  </svg>
+
+  <div class="label">Primary — light</div>
+  <div class="tile light" id="logo-light">
+    <div class="logo">
+      <svg class="mark"><use href="#sk-mark" /></svg>
+      <span class="word"><span class="side">SIDE</span><span class="kick"><span class="speed"><i></i><i></i><i></i></span>KICK</span></span>
+    </div>
+  </div>
+
+  <div class="label">Primary — dark</div>
+  <div class="tile dark" id="logo-dark">
+    <div class="logo">
+      <svg class="mark"><use href="#sk-mark" /></svg>
+      <span class="word"><span class="side">SIDE</span><span class="kick"><span class="speed"><i></i><i></i><i></i></span>KICK</span></span>
+    </div>
+  </div>
+
+  <div class="label">Stacked with tagline</div>
+  <div class="tile light" style="justify-content:center" id="logo-stacked">
+    <div class="stack">
+      <svg class="mark" style="width:96px;height:96px"><use href="#sk-mark" /></svg>
+      <span class="word"><span class="side">SIDE</span><span class="kick"><span class="speed"><i></i><i></i><i></i></span>KICK</span></span>
+      <div class="tag">Every coach needs a sidekick.</div>
+    </div>
+  </div>
+
+  <div class="label">Icon</div>
+  <div class="tile light" style="gap:28px">
+    <svg id="icon" style="width:128px;height:128px"><use href="#sk-mark" /></svg>
+    <svg style="width:64px;height:64px"><use href="#sk-mark" /></svg>
+    <svg style="width:32px;height:32px"><use href="#sk-mark" /></svg>
+  </div>
+</div>
+</body>
+</html>
