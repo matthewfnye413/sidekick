@@ -9,7 +9,7 @@ import PlannerTab from './components/PlannerTab'
 import UsageTab from './components/UsageTab'
 import GuideTab from './components/GuideTab'
 import StudentView from './components/StudentView'
-import Logo from './components/Logo'
+import { Wordmark } from './components/Logo'
 
 const STAFF_TABS = [
   { id: 'curriculum', label: 'Curriculum' },
@@ -127,7 +127,7 @@ function TopBar({ school, role, switcher, onSignOut }) {
   return (
     <header className="topbar">
       <div className="topbar-inner">
-        <div className="brand"><Logo className="brand-mark" /><span>Side<span className="kick">Kick</span></span></div>
+        <Wordmark />
         {school && <span className="school">{school}{role && ` · ${role}`}</span>}
         {switcher}
         <span className="spacer" />

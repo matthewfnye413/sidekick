@@ -1,24 +1,27 @@
 import { useCallback, useEffect, useState } from 'react'
 import { q, supabase } from '../supabase'
 import AddStudent from './AddStudent'
+import { openCertificate, removeCertificate, uploadCertificate } from '../certificates'
 
 function MembersTab({ school, me, myRole }) {
   const [members, setMembers] = useState(null)
   const [students, setStudents] = useState([])
   const [programs, setPrograms] = useState([])
   const [unlocks, setUnlocks] = useState([])
+  const [certs, setCerts] = useState([])
   const [adding, setAdding] = useState(false)
   const [error, setError] = useState(null)
 
   const load = useCallback(async () => {
     try {
-      const [m, s, p, u] = await Promise.all([
+      const [m, s, p, u, c] = await Promise.all([
         q(supabase.from('memberships').select('*').eq('school_id', school.id).order('created_at', { ascending: false })),
         q(supabase.from('students').select('*').eq('school_id', school.id).order('name')),
         q(supabase.from('programs').select('id,name,starting_rank,ranks(id,sort,name)').eq('school_id', school.id)),
         q(supabase.from('rank_unlocks').select('student_id,rank_id')),
+        q(supabase.from('certificates').select('student_id,rank_id,path')),
       ])
-      setMembers(m); setStudents(s); setPrograms(p); setUnlocks(u)
+      setMembers(m); setStudents(s); setPrograms(p); setUnlocks(u); setCerts(c)
     } catch (e) { setError(e.message) }
   }, [school.id])
 
@@ -107,6 +110,7 @@ function MembersTab({ school, me, myRole }) {
           {students.map((s) => (
             <RosterRow key={s.id} student={s} program={prog(s.program_id)}
               unlocked={unlocks.filter((u) => u.student_id === s.id).map((u) => u.rank_id)}
+              certs={certs.filter((c) => c.student_id === s.id)} schoolId={school.id}
               onChange={load} onRemove={() => removeStudent(s)} onError={setError} />
           ))}
         </tbody></table>
@@ -115,11 +119,13 @@ function MembersTab({ school, me, myRole }) {
   )
 }
 
-function RosterRow({ student, program, unlocked, onChange, onRemove, onError }) {
+function RosterRow({ student, program, unlocked, certs, schoolId, onChange, onRemove, onError }) {
   const [open, setOpen] = useState(false)
+  const [showCerts, setShowCerts] = useState(false)
   if (!program) return null
   const ranks = [...program.ranks].sort((a, b) => a.sort - b.sort)
   const higher = ranks.filter((r) => r.sort > student.current_rank_sort + 1)
+  const earned = ranks.filter((r) => r.sort <= student.current_rank_sort)
 
   const promote = async (sort) => {
     try { await q(supabase.rpc('set_student_rank', { p_student: student.id, p_sort: sort })); onChange() } catch (e) { onError(e.message) }
@@ -144,6 +150,11 @@ function RosterRow({ student, program, unlocked, onChange, onRemove, onError }) 
           </select>
         </td>
         <td style={{ textAlign: 'right' }} className="row">
+          {earned.length > 0 && (
+            <button className="link" onClick={() => setShowCerts(!showCerts)}>
+              {certs.length ? `${certs.length} certificate${certs.length === 1 ? '' : 's'}` : 'Certificates'}
+            </button>
+          )}
           {higher.length > 0 && (
             <button className="link" onClick={() => setOpen(!open)}>
               {unlocked.length ? `${unlocked.length} unlocked` : 'Unlock ranks'}
@@ -152,6 +163,19 @@ function RosterRow({ student, program, unlocked, onChange, onRemove, onError }) 
           <button className="link" onClick={onRemove}>Remove</button>
         </td>
       </tr>
+      {showCerts && (
+        <tr>
+          <td colSpan={4} style={{ background: 'var(--bg)' }}>
+            <span className="muted">Rank certificates for {student.name} (PDF, shown on their path next to “Earned”):</span>
+            <div className="cert-list">
+              {earned.map((r) => (
+                <CertificateSlot key={r.id} rank={r} cert={certs.find((c) => c.rank_id === r.id)}
+                  schoolId={schoolId} studentId={student.id} onChange={onChange} onError={onError} />
+              ))}
+            </div>
+          </td>
+        </tr>
+      )}
       {open && (
         <tr>
           <td colSpan={4} style={{ background: 'var(--bg)' }}>
@@ -170,6 +194,37 @@ function RosterRow({ student, program, unlocked, onChange, onRemove, onError }) 
         </tr>
       )}
     </>
+  )
+}
+
+function CertificateSlot({ rank, cert, schoolId, studentId, onChange, onError }) {
+  const [busy, setBusy] = useState(false)
+  const run = async (fn) => {
+    setBusy(true)
+    try { await fn(); await onChange() } catch (e) { onError(e.message) }
+    setBusy(false)
+  }
+  return (
+    <div className="cert-slot">
+      <strong>{rank.name}</strong>
+      {cert ? (
+        <span className="row" style={{ gap: 10 }}>
+          <span className="pill ok">Uploaded</span>
+          <button className="link" onClick={() => openCertificate(cert.path).catch((e) => onError(e.message))}>View</button>
+          <label className="link" style={{ cursor: 'pointer' }}>Replace
+            <input type="file" accept="application/pdf" hidden disabled={busy}
+              onChange={(e) => e.target.files[0] && run(() => uploadCertificate(schoolId, studentId, rank.id, e.target.files[0]))} />
+          </label>
+          <button className="link" disabled={busy} onClick={() => window.confirm(`Remove ${rank.name} certificate?`) && run(() => removeCertificate(cert))}>Remove</button>
+        </span>
+      ) : (
+        <label className="btn" style={{ cursor: 'pointer', padding: '4px 10px', fontSize: 13 }}>
+          {busy ? 'Uploading…' : 'Upload PDF'}
+          <input type="file" accept="application/pdf" hidden disabled={busy}
+            onChange={(e) => e.target.files[0] && run(() => uploadCertificate(schoolId, studentId, rank.id, e.target.files[0]))} />
+        </label>
+      )}
+    </div>
   )
 }
 

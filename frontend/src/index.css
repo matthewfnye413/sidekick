@@ -174,3 +174,20 @@ table.readiness td { vertical-align: middle; }
   .mobile-brand { display: block; text-align: center; margin-bottom: 4px; }
   .mobile-brand .brand { justify-content: center; color: var(--text); }
 }
+
+/* ─── Wordmark: SIDE + speed lines + forward-leaning KICK ─── */
+.brand .brand-mark { width: 1.25em; height: 1.25em; }
+.wm { display: inline-flex; align-items: center; line-height: 1; letter-spacing: 0.01em; }
+.wm-side { color: #fff; }
+.mobile-brand .wm-side { color: var(--text); }
+.wm-kick { color: var(--accent); font-style: italic; display: inline-flex; align-items: center; transform: skewX(-6deg); }
+.wm-speed { display: inline-flex; flex-direction: column; gap: 0.1em; margin: 0 0.14em 0 0.18em; }
+.wm-speed i { display: block; height: 0.09em; min-height: 2px; border-radius: 2px; background: var(--accent); }
+.wm-speed i:nth-child(1) { width: 0.3em; margin-left: 0.17em; }
+.wm-speed i:nth-child(2) { width: 0.47em; }
+.wm-speed i:nth-child(3) { width: 0.24em; margin-left: 0.23em; }
+
+/* ─── Certificates ─── */
+.cert-list { display: flex; flex-direction: column; gap: 6px; margin-top: 8px; }
+.cert-slot { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 6px 10px; border: 1px solid var(--line); border-radius: 8px; background: var(--card); }
+.cert-link { font-size: 13px; text-decoration: none; font-weight: 600; }

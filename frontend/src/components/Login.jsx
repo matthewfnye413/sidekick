@@ -1,6 +1,6 @@
 import { useState } from 'react'
 import { supabase } from '../supabase'
-import Logo from './Logo'
+import { Wordmark } from './Logo'
 
 const TITLES = { signin: 'Sign in', signup: 'Create your account', reset: 'Reset your password' }
 
@@ -34,7 +34,7 @@ function Login() {
   return (
     <div className="landing">
       <section className="landing-hero">
-        <div className="brand" style={{ fontSize: 30 }}><Logo className="brand-mark" /><span>Side<span className="kick">Kick</span></span></div>
+        <Wordmark style={{ fontSize: 34 }} />
         <h1>Every coach needs a <em>sidekick</em>.</h1>
         <p className="hero-sub">
           Your A.I. — <em>Assistant Instructor</em> — turns the curriculum PDFs you already have into rank-by-rank
@@ -67,7 +67,7 @@ function Login() {
       <section className="landing-form">
         <form className="card auth stack" onSubmit={submit}>
           <div className="mobile-brand">
-            <div className="brand"><Logo className="brand-mark" /><span>Side<span className="kick">Kick</span></span></div>
+            <Wordmark style={{ fontSize: 30 }} />
             <p className="muted">Every coach needs a sidekick.</p>
           </div>
           <h2>{TITLES[mode]}</h2>

@@ -1,6 +1,7 @@
 import { useCallback, useEffect, useState } from 'react'
 import { q, supabase } from '../supabase'
 import AddStudent, { rankName } from './AddStudent'
+import { openCertificate } from '../certificates'
 
 const keyOf = (category, item) => `${category}::${item}`
 
@@ -125,6 +126,14 @@ function Checklist({ student, program }) {
 
 // The whole path: open ranks can be expanded; locked ones show only their name.
 function RankPath({ student, program }) {
+  const [certs, setCerts] = useState([])
+  useEffect(() => {
+    q(supabase.from('certificates').select('rank_id,path').eq('student_id', student.id)).then(setCerts).catch(() => setCerts([]))
+  }, [student.id])
+  const certFor = (rankId) => certs.find((c) => c.rank_id === rankId)
+  const CertLink = ({ r }) => certFor(r.id) ? (
+    <button className="link cert-link" onClick={(e) => { e.preventDefault(); openCertificate(certFor(r.id).path) }}>📄 Certificate</button>
+  ) : null
   return (
     <div className="card">
       <h3>Your path</h3>
@@ -134,7 +143,7 @@ function RankPath({ student, program }) {
           <div key={r.id} className="rank"><div className="rank-head" style={{ cursor: 'default', opacity: 0.6 }}>
             <span className="belt-swatch" style={{ background: r.color }} /><strong>{r.name}</strong>
             {status === 'Earned'
-              ? <><span className="pill ok">Earned</span><span className="muted">🔒 Hidden by your school's settings</span></>
+              ? <><span className="pill ok">Earned</span><CertLink r={r} /><span className="muted">🔒 Hidden by your school's settings</span></>
               : <span className="muted">🔒 Opens when your instructor unlocks it</span>}
           </div></div>
         ) : (
@@ -142,6 +151,7 @@ function RankPath({ student, program }) {
             <summary>
               <span className="belt-swatch" style={{ background: r.color }} /><strong>{r.name}</strong>
               {status && <span className={`pill ${status === 'Earned' ? 'ok' : 'error'}`}>{status}</span>}
+              {status === 'Earned' && <CertLink r={r} />}
             </summary>
             <div className="rank-body">
               {r.requirements.map((c) => (
