@@ -22,7 +22,7 @@ function ReadinessTab({ school }) {
         q(supabase.from('students').select('*').eq('school_id', school.id).order('name')),
         q(supabase.from('programs').select('id,name,starting_rank,ranks(id,sort,name,color,requirements)').eq('school_id', school.id)),
       ])
-      const pr = s.length ? await q(supabase.from('progress').select('student_id,rank_id,item_key').in('student_id', s.map((x) => x.id))) : []
+      const pr = s.length ? await q(supabase.from('progress').select('student_id,rank_id,item_key,checked_by').in('student_id', s.map((x) => x.id))) : []
       setStudents(s); setPrograms(p); setProgress(pr)
     } catch (e) { setError(e.message) }
   }, [school.id])
@@ -31,15 +31,15 @@ function ReadinessTab({ school }) {
 
   const rows = useMemo(() => {
     if (!students) return []
-    const done = new Set(progress.map((p) => `${p.student_id}|${p.rank_id}|${p.item_key}`))
+    const done = new Map(progress.map((p) => [`${p.student_id}|${p.rank_id}|${p.item_key}`, p.checked_by]))
     return students.map((s) => {
       const program = programs.find((p) => p.id === s.program_id)
       const next = program?.ranks.find((r) => r.sort === s.current_rank_sort + 1)
-      if (!next) return { s, program, next: null, pct: 100, count: 0, total: 0, missing: [] }
+      if (!next) return { s, program, next: null, pct: 100, count: 0, total: 0, missing: [], done }
       const items = next.requirements.flatMap((c) => c.items.map((i) => ({ c: c.name, i })))
       const missing = items.filter(({ c, i }) => !done.has(`${s.id}|${next.id}|${keyOf(c, i)}`))
       const total = items.length
-      return { s, program, next, total, count: total - missing.length, pct: total ? Math.round(((total - missing.length) / total) * 100) : 0, missing }
+      return { s, program, next, total, count: total - missing.length, pct: total ? Math.round(((total - missing.length) / total) * 100) : 0, missing, done }
     }).filter((r) => programFilter === 'all' || r.program?.id === programFilter)
       .sort((a, b) => b.pct - a.pct)
   }, [students, programs, progress, programFilter])
@@ -85,7 +85,8 @@ function ReadinessTab({ school }) {
             <thead><tr><th>Student</th><th>Working toward</th><th style={{ width: '34%' }}>Progress</th><th>Status</th><th /></tr></thead>
             <tbody>
               {rows.map((r) => (
-                <ReadinessRow key={r.s.id} r={r} open={open === r.s.id} onToggle={() => setOpen(open === r.s.id ? null : r.s.id)} onPromote={() => promote(r)} />
+                <ReadinessRow key={r.s.id} r={r} open={open === r.s.id} onToggle={() => setOpen(open === r.s.id ? null : r.s.id)}
+                  onPromote={() => promote(r)} onChange={load} onError={setError} />
               ))}
             </tbody>
           </table>
@@ -95,7 +96,7 @@ function ReadinessTab({ school }) {
   )
 }
 
-function ReadinessRow({ r, open, onToggle, onPromote }) {
+function ReadinessRow({ r, open, onToggle, onPromote, onChange, onError }) {
   if (!r.next) {
     return (
       <tr><td><strong>{r.s.name}</strong><div className="muted">{r.program?.name} · {rankName(r.program, r.s.current_rank_sort)}</div></td>
@@ -114,17 +115,61 @@ function ReadinessRow({ r, open, onToggle, onPromote }) {
         </td>
         <td>{b.label && <span className={`pill ${b.cls}`}>{b.label}</span>}</td>
         <td style={{ textAlign: 'right', whiteSpace: 'nowrap' }}>
-          {r.missing.length > 0 && <button className="link" onClick={onToggle}>{open ? 'Hide' : `${r.missing.length} left`}</button>}{' '}
+          <button className="link" onClick={onToggle}>{open ? 'Close checklist' : 'Checklist'}</button>{' '}
           <button className="btn" onClick={onPromote}>Promote</button>
         </td>
       </tr>
       {open && (
         <tr><td colSpan={5} style={{ background: 'var(--bg)' }}>
-          <span className="muted">Still to practice for {r.next.name}:</span>
-          <div className="missing-list">{r.missing.map(({ c, i }) => <span key={c + i} className="pill">{i}</span>)}</div>
+          <StaffChecklist r={r} onChange={onChange} onError={onError} />
         </td></tr>
       )}
     </>
+  )
+}
+
+// Instructors can correct any student's checklist. Items an instructor checked are marked.
+function StaffChecklist({ r, onChange, onError }) {
+  const [busy, setBusy] = useState(null)
+  const toggle = async (key) => {
+    const id = `${r.s.id}|${r.next.id}|${key}`
+    const row = { student_id: r.s.id, rank_id: r.next.id, item_key: key }
+    setBusy(key)
+    try {
+      if (r.done.has(id)) await q(supabase.from('progress').delete().match(row))
+      else await q(supabase.from('progress').insert(row))
+      await onChange()
+    } catch (e) { onError(e.message) }
+    setBusy(null)
+  }
+  return (
+    <div>
+      <div className="row between">
+        <strong>{r.s.name} · {r.next.name} checklist</strong>
+        <span className="muted">Changes save immediately. <span className="pill info">coach</span> = checked by an instructor</span>
+      </div>
+      <div className="rank-body" style={{ padding: '8px 0 0' }}>
+        {r.next.requirements.map((c) => (
+          <div key={c.name} className="cat">
+            <h4>{c.name}</h4>
+            <ul className="checklist">
+              {c.items.map((i) => {
+                const key = keyOf(c.name, i)
+                const by = r.done.get(`${r.s.id}|${r.next.id}|${key}`)
+                return (
+                  <li key={key}>
+                    <label style={{ opacity: busy === key ? 0.5 : 1 }}>
+                      <input type="checkbox" checked={r.done.has(`${r.s.id}|${r.next.id}|${key}`)} disabled={busy !== null} onChange={() => toggle(key)} />
+                      {i} {by && by !== r.s.account_id && <span className="pill info">coach</span>}
+                    </label>
+                  </li>
+                )
+              })}
+            </ul>
+          </div>
+        ))}
+      </div>
+    </div>
   )
 }
 
