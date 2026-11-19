@@ -123,7 +123,9 @@ function RankPath({ student, program }) {
         return r.locked ? (
           <div key={r.id} className="rank"><div className="rank-head" style={{ cursor: 'default', opacity: 0.6 }}>
             <span className="belt-swatch" style={{ background: r.color }} /><strong>{r.name}</strong>
-            <span className="muted">🔒 Opens when your instructor unlocks it</span>
+            {status === 'Earned'
+              ? <><span className="pill ok">Earned</span><span className="muted">🔒 Hidden by your school's settings</span></>
+              : <span className="muted">🔒 Opens when your instructor unlocks it</span>}
           </div></div>
         ) : (
           <details key={r.id} className="rank">
