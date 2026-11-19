@@ -66,6 +66,10 @@ function Login() {
       </section>
       <section className="landing-form">
         <form className="card auth stack" onSubmit={submit}>
+          <div className="mobile-brand">
+            <div className="brand"><Logo className="brand-mark" /><span>Side<span className="kick">Kick</span></span></div>
+            <p className="muted">Every sensei needs a sidekick.</p>
+          </div>
           <h2>{TITLES[mode]}</h2>
           <label className="field">Email
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required autoComplete="email" />
