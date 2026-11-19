@@ -103,8 +103,9 @@ python scripts/measure_tokens.py    # tokens, cost and accuracy for every curric
   school staff can call.
 * **Least privilege.** The API never holds a database master key: every query runs as the signed-in user,
   so Row Level Security limits the agents exactly as it limits people. Schools cannot see each other.
-* **Overspending.** Per-call token caps and request limits, 10 AI runs per user per hour, and a monthly
-  token budget per school, enforced against an append-only usage log.
+* **Overspending.** Per-call token caps and request limits, and 10 AI runs per user per hour. Each plan has a
+  monthly AI allowance; normal overage is absorbed (a school never "runs out"), and only usage at 10x the
+  allowance (a runaway bug or misuse) is paused, checked against an append-only usage log.
 
 ## Not included
 

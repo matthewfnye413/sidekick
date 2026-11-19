@@ -76,6 +76,7 @@ async def db_error(request: Request, exc: DBError):
 MAX_UPLOAD_BYTES = 8 * 1024 * 1024  # 8 MB per file
 MAX_FILES = 6
 RATE_LIMIT = (10, 3600)  # at most 10 AI runs per user per hour
+ABUSE_MULTIPLIER = 10    # pause only far above the plan allowance; normal overage is absorbed
 _recent: dict[str, deque] = defaultdict(deque)
 
 
@@ -100,7 +101,7 @@ async def caller(authorization: str = Header(default="")) -> Caller:
 
 
 async def require_staff_with_budget(school_id: str, who: Caller) -> None:
-    """Three overspending guards: staff only, per-user rate limit, per-school monthly token budget."""
+    """Overspending guards: staff only, per-user rate limit, and an abuse ceiling far above the plan allowance."""
     if not await who.db.rpc("is_staff", sid=school_id):
         raise HTTPException(403, "Only the school's owner or instructors can use the AI tools.")
 
@@ -111,11 +112,16 @@ async def require_staff_with_budget(school_id: str, who: Caller) -> None:
         raise HTTPException(429, f"Limit reached: {RATE_LIMIT[0]} AI runs per hour. Try again later.")
     window.append(now)
 
+    # A school never "runs out": usage over its plan allowance is absorbed (it costs cents).
+    # Only usage at ABUSE_MULTIPLIER x the allowance (a runaway bug or misuse) is paused.
     school = (await who.db.select("schools", select="monthly_token_budget", id=f"eq.{school_id}"))[0]
+    allowance = school["monthly_token_budget"]
     used = await who.db.rpc("tokens_used_this_month", p_school=school_id)
-    if used >= school["monthly_token_budget"]:
-        raise HTTPException(402, f"This school used its monthly AI budget ({used:,} of "
-                                 f"{school['monthly_token_budget']:,} tokens).")
+    if used >= allowance * ABUSE_MULTIPLIER:
+        print(f"ALERT: school {school_id} paused at {used:,} tokens ({ABUSE_MULTIPLIER}x allowance {allowance:,})")
+        raise HTTPException(402, f"AI tools are paused for this school: {used:,} tokens this month is far above the "
+                                 f"plan's {allowance:,}, which usually means something went wrong. "
+                                 "Contact SideKick and we'll restore it right away.")
 
 
 async def record_usage(who: Caller, school_id: str, kind: str, usage: dict) -> None:
