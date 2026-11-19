@@ -1,4 +1,4 @@
-# SideKick — every sensei needs a sidekick
+# SideKick — every coach needs a sidekick
 
 **Live app:** https://sidekick-dojo.netlify.app  ·  **API:** https://sidekick-api-k5iz.onrender.com/api/health
 

@@ -35,16 +35,16 @@ function Login() {
     <div className="landing">
       <section className="landing-hero">
         <div className="brand" style={{ fontSize: 30 }}><Logo className="brand-mark" /><span>Side<span className="kick">Kick</span></span></div>
-        <h1>Every sensei needs a <em>sidekick</em>.</h1>
+        <h1>Every coach needs a <em>sidekick</em>.</h1>
         <p className="hero-sub">
           Your A.I. — <em>Assistant Instructor</em> — turns the curriculum PDFs you already have into rank-by-rank
-          checklists your students actually use. You stay in control of every belt.
+          checklists your students actually use. You maintain control of curriculum access.
         </p>
 
         <ol className="how">
           <li><span>1</span><div><strong>Upload</strong> your curriculum PDFs: belts, kyu grades or levels, lists or tables.</div></li>
           <li><span>2</span><div><strong>Two agents</strong> build the checklists and check them against your document.</div></li>
-          <li><span>3</span><div><strong>You approve</strong>. Students see only the ranks you allow, and track their path.</div></li>
+          <li><span>3</span><div><strong>You approve</strong>. Students see only the belt curriculum you allow and can track their own progress.</div></li>
         </ol>
 
         <div className="preview" aria-hidden="true">
@@ -61,14 +61,14 @@ function Login() {
         <div className="trust">
           <span>✓ Nothing published without your approval</span>
           <span>✓ Each school's data is private</span>
-          <span>✓ Under a cent of AI per import</span>
+          <span>✓ Less than a penny of AI per import</span>
         </div>
       </section>
       <section className="landing-form">
         <form className="card auth stack" onSubmit={submit}>
           <div className="mobile-brand">
             <div className="brand"><Logo className="brand-mark" /><span>Side<span className="kick">Kick</span></span></div>
-            <p className="muted">Every sensei needs a sidekick.</p>
+            <p className="muted">Every coach needs a sidekick.</p>
           </div>
           <h2>{TITLES[mode]}</h2>
           <label className="field">Email
