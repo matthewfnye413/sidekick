@@ -53,6 +53,9 @@ async def agent_error(request: Request, exc: AgentRunError):
         msg = "The AI run hit its safety limit and was stopped before finishing. Try a smaller file or class."
     elif isinstance(exc, ModelHTTPError) and exc.status_code in (401, 403):
         msg = "The AI service rejected SideKick's API key. The site owner needs to check the server's PORTKEY_API_KEY."
+    elif isinstance(exc, ModelHTTPError) and "content_filter" in str(exc.body):
+        msg = ("The AI provider's safety filter blocked this file. It may contain text aimed at manipulating an AI. "
+               "Check the document, remove anything that isn't curriculum, and upload it again.")
     else:
         msg = "The AI service had a problem finishing this request. Please try again."
     print(f"Agent error on {request.url.path}: {exc!r}")

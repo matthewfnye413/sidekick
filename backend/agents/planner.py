@@ -116,15 +116,18 @@ async def run_planner(db: UserDB, school_id: str, student_ids: list[str], minute
     prompt = f"Class length: {minutes} minutes.\nInstructor's focus: {focus or '(none given)'}\nStudents checked in: {len(data.students)}"
     result = await planner.run(prompt, deps=data, usage_limits=PLAN_LIMITS)
     meter.add("planner", result.usage)
-
-    # Guardrail: drop anything that isn't in the school's curriculum (the agent must not invent techniques).
-    known = data.all_items()
-    removed: list[str] = []
     plan = result.output
+    removed = strip_invented(plan, data.all_items())
+    return plan, removed
+
+
+def strip_invented(plan: LessonPlan, known: set[str]) -> list[str]:
+    """Guardrail: drop any technique that isn't in the school's curriculum. Returns what was removed."""
+    removed: list[str] = []
     for seg in plan.segments:
         keep = []
         for t in seg.techniques:
-            name = t.split(":", 1)[-1].strip()
+            name = t.split(":", 1)[-1].strip()  # techniques may come back as "Heading: Technique"
             (keep if compact(name) in known or compact(t) in known else removed).append(t)
         seg.techniques = keep
-    return plan, removed
+    return removed

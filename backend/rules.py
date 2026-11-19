@@ -81,7 +81,9 @@ def check(draft: ProgramDraft, source_text: str) -> list[Issue]:
                 seen.add(key)
 
     # 3. Dropped? Every non-heading line in the document should be covered by the draft.
-    corpus = compact(" ".join(draft_strings(draft)))
+    # "|" separators stop a line from matching across two different items
+    # (e.g. "Harai Goshi" must not be "found" in "...Deashi Harai|Ogoshi...").
+    corpus = "|".join(compact(s) for s in draft_strings(draft) if s)
     reported: set[str] = set()
     for raw in source_text.splitlines():
         line = raw.strip()
@@ -90,10 +92,10 @@ def check(draft: ProgramDraft, source_text: str) -> list[Issue]:
         key = compact(line)
         if len(key) < 3 or key in corpus or _is_section_title(key, draft):
             continue
-        # Table layouts get extracted with columns interleaved on one line, so also accept a line
-        # when most of its words appear somewhere in the draft.
+        # Table layouts get extracted with several cells interleaved on one line. Only for those longer
+        # lines, accept the line when most of its words appear in the draft.
         words = [compact(w) for w in line.split() if len(compact(w)) >= 3]
-        if words and sum(w in corpus for w in words) / len(words) >= 0.7:
+        if len(words) >= 3 and sum(w in corpus for w in words) / len(words) >= 0.7:
             continue
         reported.add(line)
         issues.append(Issue(
