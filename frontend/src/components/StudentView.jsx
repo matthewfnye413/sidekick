@@ -111,7 +111,7 @@ function Checklist({ student, program }) {
                 return (
                   <li key={k}><label>
                     <input type="checkbox" checked={done.has(`${next.id}|${k}`)} onChange={() => toggle(k)} /> {i}
-                    {byCoach.has(`${next.id}|${k}`) && done.has(`${next.id}|${k}`) && <span className="pill info">coach</span>}
+                    {byCoach.has(`${next.id}|${k}`) && done.has(`${next.id}|${k}`) && <span className="pill info">instructor</span>}
                   </label></li>
                 )
               })}

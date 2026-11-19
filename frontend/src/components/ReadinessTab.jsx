@@ -146,7 +146,7 @@ function StaffChecklist({ r, onChange, onError }) {
     <div>
       <div className="row between">
         <strong>{r.s.name} · {r.next.name} checklist</strong>
-        <span className="muted">Changes save immediately. <span className="pill info">coach</span> = checked by an instructor</span>
+        <span className="muted">Changes save immediately. <span className="pill info">instructor</span> = checked by an instructor</span>
       </div>
       <div className="rank-body" style={{ padding: '8px 0 0' }}>
         {r.next.requirements.map((c) => (
@@ -160,7 +160,7 @@ function StaffChecklist({ r, onChange, onError }) {
                   <li key={key}>
                     <label style={{ opacity: busy === key ? 0.5 : 1 }}>
                       <input type="checkbox" checked={r.done.has(`${r.s.id}|${r.next.id}|${key}`)} disabled={busy !== null} onChange={() => toggle(key)} />
-                      {i} {by && by !== r.s.account_id && <span className="pill info">coach</span>}
+                      {i} {by && by !== r.s.account_id && <span className="pill info">instructor</span>}
                     </label>
                   </li>
                 )
