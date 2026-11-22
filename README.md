@@ -55,7 +55,7 @@ The local web app talks to the local API at `http://localhost:8000` by default.
 python -m backend.cli_import "samples/ejj/Adult Curriculum.pdf" --program Adult            # text only
 python -m backend.cli_import "samples/ejj/Adult Curriculum.pdf" --program Adult --vision   # + page layout
 python scripts/score_import.py output/import_Adult_Curriculum.json samples/ejj/answer_key.json adult
-python scripts/safety_tests.py      # prompt injection, invented/dropped techniques, planner guardrail
+python scripts/safety_tests.py      # 8 tests: injection, invented/dropped items, guardrail, overspending
 python scripts/measure_tokens.py    # tokens, cost and accuracy for every curriculum, both modes
 ```
 

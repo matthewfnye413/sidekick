@@ -7,6 +7,9 @@ Writes output/safety_tests.json with every result.
   2. An invented technique in a draft is caught by the rules (zero tokens).
   3. A dropped technique is caught by the rules (zero tokens).
   4. The Class Planner guardrail strips a technique that isn't in the curriculum.
+  5. The 11th AI run in an hour is refused (zero tokens).
+  6. A school at 10x its monthly allowance is paused; one merely over its allowance is not (zero tokens).
+  7. An agent stuck calling its tool forever is stopped by its per-run limit (zero tokens).
 """
 
 from __future__ import annotations
@@ -25,7 +28,12 @@ from backend.agents.curriculum import run_import  # noqa: E402
 from backend.agents.planner import strip_invented  # noqa: E402
 from backend.extract import extract_text  # noqa: E402
 from backend.models import LessonPlan, ProgramDraft, Segment  # noqa: E402
-from pydantic_ai.exceptions import ModelHTTPError  # noqa: E402
+from backend import main as api  # noqa: E402
+from backend.agents.planner import PLAN_LIMITS, ClassData, planner  # noqa: E402
+from fastapi import HTTPException  # noqa: E402
+from pydantic_ai.exceptions import ModelHTTPError, UsageLimitExceeded  # noqa: E402
+from pydantic_ai.messages import ModelResponse, ToolCallPart  # noqa: E402
+from pydantic_ai.models.function import FunctionModel  # noqa: E402
 
 # Blatant attack: the Portkey gateway's content filter blocks it; on OpenAI direct it reaches the agent.
 BLATANT = (
@@ -137,8 +145,63 @@ def test_planner_guardrail() -> dict:
     })
 
 
+class StubDB:
+    """Stands in for the database so the real guard code runs without touching real schools."""
+
+    def __init__(self, used: int, allowance: int = 2_000_000):
+        self.used, self.allowance = used, allowance
+
+    async def rpc(self, name, **_):
+        return True if name == "is_staff" else self.used
+
+    async def select(self, *_, **__):
+        return [{"monthly_token_budget": self.allowance}]
+
+
+async def guard(user: str, used: int) -> str:
+    who = api.Caller.model_construct(id=user, email="", db=StubDB(used))
+    try:
+        await api.require_staff_with_budget("test-school", who)
+        return "allowed"
+    except HTTPException as e:
+        return f"HTTP {e.status_code}: {e.detail}"
+
+
+async def test_rate_limit() -> dict:
+    outcomes = [await guard("rate-test", 0) for _ in range(11)]
+    ok = outcomes[:10] == ["allowed"] * 10 and outcomes[10].startswith("HTTP 429")
+    return report("5. The 11th AI run in an hour is refused", ok, {
+        "runs_1_to_10": "allowed", "run_11": outcomes[10], "tokens": 0})
+
+
+async def test_abuse_ceiling() -> dict:
+    over, ceiling = await guard("budget-a", 2_500_000), await guard("budget-b", 20_000_000)
+    return report("6. Runaway school is paused at 10x its allowance", over == "allowed" and ceiling.startswith("HTTP 402"), {
+        "at_2,500,000_of_2,000,000": over, "at_20,000,000_of_2,000,000": ceiling, "tokens": 0})
+
+
+async def test_runaway_loop() -> dict:
+    calls = 0
+
+    def stuck(messages, info):  # a model that never answers, only calls its tool again
+        nonlocal calls
+        calls += 1
+        return ModelResponse(parts=[ToolCallPart("class_roster", {})])
+
+    data = ClassData(students=[], programs={}, ranks_by_program={})
+    try:
+        with planner.override(model=FunctionModel(stuck)):
+            await planner.run("test", deps=data, usage_limits=PLAN_LIMITS)
+        error = "NOT STOPPED"
+    except UsageLimitExceeded as e:
+        error = str(e)
+    return report("7. An agent looping on its tool is stopped", error != "NOT STOPPED" and calls <= PLAN_LIMITS.request_limit, {
+        "model_calls_before_stop": calls, "stopped_by": error, "tokens": 0})
+
+
 async def main() -> None:
-    results = [await test_blatant_injection(), await test_injection(), test_invented(), test_dropped(), test_planner_guardrail()]
+    results = [await test_blatant_injection(), await test_injection(), test_invented(), test_dropped(), test_planner_guardrail(),
+               await test_rate_limit(), await test_abuse_ceiling(), await test_runaway_loop()]
     out = ROOT / "output" / "safety_tests.json"
     out.write_text(json.dumps(results, indent=2), encoding="utf-8")
     print(f"\n{sum(r['passed'] for r in results)}/{len(results)} passed · saved {out}")

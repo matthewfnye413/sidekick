@@ -125,6 +125,8 @@ button.link { background: none; border: none; color: var(--accent); padding: 0; 
 .segment { border-left: 4px solid var(--accent); padding: 8px 12px; margin-bottom: 10px; background: var(--card); border-radius: 0 8px 8px 0; }
 table { width: 100%; border-collapse: collapse; font-size: 14px; }
 th, td { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
+td.actions { text-align: right; }
+td.actions > * + * { margin-left: 10px; }
 th { color: var(--muted); font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.04em; }
 .stat { font-family: var(--display); font-size: 28px; font-weight: 600; }
 .steps { counter-reset: s; list-style: none; padding: 0; }

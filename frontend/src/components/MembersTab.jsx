@@ -55,7 +55,7 @@ function MembersTab({ school, me, myRole }) {
             {pending.map((m) => (
               <tr key={m.user_id}>
                 <td><strong>{m.full_name || '(no name)'}</strong><div className="muted">{m.email}</div></td>
-                <td className="row" style={{ justifyContent: 'flex-end' }}>
+                <td className="actions">
                   <button className="btn primary" onClick={() => set(m, 'active')}>Approve</button>
                   <button className="btn" onClick={() => set(m, 'inactive')}>Deny</button>
                 </td>
@@ -75,7 +75,7 @@ function MembersTab({ school, me, myRole }) {
                 <td><strong>{m.full_name || '(no name)'}</strong><div className="muted">{m.email}</div></td>
                 <td>{m.role}</td>
                 <td><span className={`pill ${m.status === 'active' ? 'ok' : ''}`}>{m.status}</span></td>
-                <td className="row" style={{ justifyContent: 'flex-end' }}>
+                <td className="actions">
                   {m.user_id !== me && m.role !== 'owner' && (
                     <>
                       {myRole === 'owner' && m.status === 'active' && (
@@ -149,7 +149,7 @@ function RosterRow({ student, program, unlocked, certs, schoolId, onChange, onRe
             {ranks.map((r) => <option key={r.id} value={r.sort}>{r.name}</option>)}
           </select>
         </td>
-        <td style={{ textAlign: 'right' }} className="row">
+        <td className="actions">
           {earned.length > 0 && (
             <button className="link" onClick={() => setShowCerts(!showCerts)}>
               {certs.length ? `${certs.length} certificate${certs.length === 1 ? '' : 's'}` : 'Certificates'}
