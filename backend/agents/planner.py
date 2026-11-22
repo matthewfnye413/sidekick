@@ -22,6 +22,10 @@ PROMPT = (Path(__file__).resolve().parent.parent / "prompts" / "planner.md").rea
 PLAN_LIMITS = UsageLimits(request_limit=8, tool_calls_limit=20, total_tokens_limit=80_000)
 
 
+MODES = {"new": "NEW material (what students still need)", "review": "REVIEW (only what students have already learned)",
+         "mix": "a MIX of review and new material"}
+
+
 def item_key(category: str, item: str) -> str:
     return f"{category}::{item}"  # same key the student checklist stores
 
@@ -49,6 +53,17 @@ class ClassData:
         done = self.done.get(s["id"], set())
         return [f"{c['name']}: {i}" for c in rank["requirements"] for i in c["items"]
                 if f"{rank['id']}|{item_key(c['name'], i)}" not in done]
+
+    def learned(self, s: dict) -> list[tuple[str, str]]:
+        """(heading, technique) pairs a student already has: every earned rank, plus checked-off next-rank items."""
+        ranks = self.ranks_by_program.get(s["program_id"], [])
+        done = self.done.get(s["id"], set())
+        return [(c["name"], i) for n, r in enumerate(ranks) for c in r["requirements"] for i in c["items"]
+                if n < s["current_rank_sort"] or f"{r['id']}|{item_key(c['name'], i)}" in done]
+
+    def learned_items(self) -> set[str]:
+        """Everything at least one checked-in student has learned (the only material a review may list)."""
+        return {compact(i) for s in self.students for _, i in self.learned(s)}
 
     def all_items(self) -> set[str]:
         return {compact(i) for ranks in self.ranks_by_program.values() for r in ranks
@@ -100,6 +115,23 @@ def student_gaps(ctx: RunContext[ClassData], student_ids: list[str]) -> dict[str
 
 
 @planner.tool
+def learned_material(ctx: RunContext[ClassData]) -> list[dict]:
+    """Every technique today's students have ALREADY learned (from ranks they earned and items checked off),
+    grouped by exactly which students know it, largest group first."""
+    d = ctx.deps
+    knows: dict[str, dict[str, str]] = {}  # technique -> {student_id: name}
+    for s in d.students:
+        for c, i in d.learned(s):
+            knows.setdefault(f"{c}: {i}", {})[s["id"]] = s["name"]
+    groups: dict[tuple[str, ...], list[str]] = {}
+    for technique, who in knows.items():
+        groups.setdefault(tuple(sorted(who)), []).append(technique)
+    names = {s["id"]: s["name"] for s in d.students}
+    return [{"known_by": "everyone" if len(g) == len(d.students) else [names[x] for x in g], "techniques": t}
+            for g, t in sorted(groups.items(), key=lambda kv: -len(kv[0]))]
+
+
+@planner.tool
 def rank_requirements(ctx: RunContext[ClassData], program: str, rank: str) -> list[dict]:
     """The full requirement list for one rank of one program."""
     for pid, p in ctx.deps.programs.items():
@@ -111,13 +143,18 @@ def rank_requirements(ctx: RunContext[ClassData], program: str, rank: str) -> li
 
 
 async def run_planner(db: UserDB, school_id: str, student_ids: list[str], minutes: int, focus: str,
-                      meter: UsageMeter) -> tuple[LessonPlan, list[str]]:
+                      meter: UsageMeter, mode: str = "new") -> tuple[LessonPlan, list[str]]:
     data = await load_class(db, school_id, student_ids)
-    prompt = f"Class length: {minutes} minutes.\nInstructor's focus: {focus or '(none given)'}\nStudents checked in: {len(data.students)}"
+    if mode == "review" and not data.learned_items():
+        raise ValueError("No one checked in has learned any material yet, so there is nothing to review. "
+                         "Choose new material, or check off what they know under Promotion Readiness.")
+    prompt = (f"Class length: {minutes} minutes.\nPlan around: {MODES[mode]}\n"
+              f"What the instructor wants to train: {focus or '(none given)'}\nStudents checked in: {len(data.students)}")
     result = await planner.run(prompt, deps=data, usage_limits=PLAN_LIMITS)
     meter.add("planner", result.usage)
     plan = result.output
-    removed = strip_invented(plan, data.all_items())
+    # A review may only list what someone here has learned; any other plan, what is in the curriculum.
+    removed = strip_invented(plan, data.learned_items() if mode == "review" else data.all_items())
     return plan, removed
 
 

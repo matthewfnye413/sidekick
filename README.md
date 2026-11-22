@@ -6,7 +6,8 @@ SideKick is an AI assistant instructor for martial arts schools. A school owner 
 PDFs they already hand out; an **Import agent** turns them into rank-by-rank checklists, a **Checker
 agent** reviews the result against the original document, and nothing reaches students until the
 instructor approves it. Students and parents then track progress toward their next rank, and an
-optional **Class Planner agent** drafts a lesson around what the students on the mat still need.
+optional **Class Planner agent** drafts a lesson from what the students on the mat still need, what they have
+already learned (review), or both.
 
 MGT 409 final project · Matt Nye · model: **gpt-6-luna** for every agent (`OPENAI_API_KEY`, or the course `PORTKEY_API_KEY`).
 
@@ -55,7 +56,7 @@ The local web app talks to the local API at `http://localhost:8000` by default.
 python -m backend.cli_import "samples/ejj/Adult Curriculum.pdf" --program Adult            # text only
 python -m backend.cli_import "samples/ejj/Adult Curriculum.pdf" --program Adult --vision   # + page layout
 python scripts/score_import.py output/import_Adult_Curriculum.json samples/ejj/answer_key.json adult
-python scripts/safety_tests.py      # 8 tests: injection, invented/dropped items, guardrail, overspending
+python scripts/safety_tests.py      # 9 tests: injection, invented/dropped items, guardrails, overspending
 python scripts/measure_tokens.py    # tokens, cost and accuracy for every curriculum, both modes
 ```
 
@@ -77,7 +78,7 @@ python scripts/measure_tokens.py    # tokens, cost and accuracy for every curric
                                                                                │
                          students see only the ranks their school allows  ◄────┘
 
- Class Planner agent ── tools: class_roster · student_gaps · rank_requirements  (today's students only)
+ Class Planner agent ── tools: class_roster · student_gaps · learned_material · rank_requirements  (today's students only)
                     └─ guardrail removes any technique that isn't in the school's curriculum
 ```
 
@@ -85,7 +86,7 @@ python scripts/measure_tokens.py    # tokens, cost and accuracy for every curric
 |---|---|
 | `backend/agents/curriculum.py` | Import agent → rules → Checker agent → at most one revision |
 | `backend/rules.py` | Zero-token checks: invented techniques, dropped lines, duplicates, empty headings |
-| `backend/agents/planner.py` | Class Planner agent and its three tools; post-run guardrail |
+| `backend/agents/planner.py` | Class Planner agent and its four tools; post-run guardrail |
 | `backend/main.py` | FastAPI: auth (acts as the signed-in user), rate limit, monthly token budget, usage log |
 | `backend/llm.py` | The single model: `gpt-6-luna` via OpenAI or Portkey; key read from `.env` here or one folder up |
 | `supabase/schema.sql`, `supabase/migrations/` | Multi-school database with Row Level Security; rank-gated curriculum |

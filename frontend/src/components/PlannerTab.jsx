@@ -8,6 +8,7 @@ function PlannerTab({ school }) {
   const [present, setPresent] = useState(new Set())
   const [minutes, setMinutes] = useState(60)
   const [focus, setFocus] = useState('')
+  const [mode, setMode] = useState('new')
   const [plan, setPlan] = useState(null)
   const [history, setHistory] = useState([])
   const [busy, setBusy] = useState(false)
@@ -36,21 +37,22 @@ function PlannerTab({ school }) {
   const generate = async () => {
     setBusy(true); setError(null)
     try {
-      const row = await api(`/api/schools/${school.id}/lesson-plan`, { body: { student_ids: [...present], minutes, focus } })
+      const row = await api(`/api/schools/${school.id}/lesson-plan`, { body: { student_ids: [...present], minutes, focus, mode } })
       setPlan(row); load()
     } catch (e) { setError(e.message) }
     setBusy(false)
   }
 
-  // Reopening a saved plan also restores the length and focus it was made with.
-  const openPlan = (row) => { setPlan(row); setMinutes(row.request.minutes); setFocus(row.request.focus || '') }
+  // Reopening a saved plan also restores the choices it was made with.
+  const openPlan = (row) => { setPlan(row); setMinutes(row.request.minutes); setFocus(row.request.focus || ''); setMode(row.request.mode || 'new') }
 
   return (
     <>
       <h1>Class Planner</h1>
       <p className="muted">
-        Optional. Check in who's on the mat and the <strong>Class Planner agent</strong> drafts a plan around the
-        techniques those students still need for their next rank. It only uses your published curriculum.
+        Optional. Check in who's on the mat and the <strong>Class Planner agent</strong> drafts a plan from
+        what those students still need for their next rank, what they have already learned, or both. Type what you want
+        to train, or leave it open. It only uses your published curriculum.
       </p>
       {error && <p className="error">{error}</p>}
 
@@ -69,8 +71,15 @@ function PlannerTab({ school }) {
           <label className="field">Class length (min)
             <input type="number" min={15} max={180} value={minutes} onChange={(e) => setMinutes(Number(e.target.value))} style={{ width: 110 }} />
           </label>
-          <label className="field" style={{ flex: 1, minWidth: 220 }}>Focus (optional)
-            <input value={focus} maxLength={300} onChange={(e) => setFocus(e.target.value)} placeholder="e.g. throws, test prep, self-defense" />
+          <label className="field">Plan around
+            <select value={mode} onChange={(e) => setMode(e.target.value)}>
+              <option value="new">New material they still need</option>
+              <option value="review">Review what they already know</option>
+              <option value="mix">A mix of both</option>
+            </select>
+          </label>
+          <label className="field" style={{ flex: 1, minWidth: 220 }}>What do you want to train? (optional)
+            <input value={focus} maxLength={300} onChange={(e) => setFocus(e.target.value)} placeholder="e.g. Blue Belt throws, escapes from grabs, test prep" />
           </label>
           <button className="btn primary" disabled={busy || present.size === 0} onClick={generate}>
             {busy ? 'Planning…' : 'Draft a plan'}
@@ -88,7 +97,7 @@ function PlannerTab({ school }) {
             {history.map((h) => (
               <tr key={h.id}>
                 <td><button className="link" onClick={() => openPlan(h)}>{h.plan.title}</button></td>
-                <td className="muted">{h.request.student_ids.length} students · {h.request.minutes} min</td>
+                <td className="muted">{h.request.student_ids.length} students · {h.request.minutes} min{h.request.mode && h.request.mode !== 'new' ? ` · ${h.request.mode}` : ''}</td>
                 <td className="muted">{fmtDate(h.created_at)}</td>
               </tr>
             ))}
@@ -118,8 +127,8 @@ function PlanView({ row }) {
       ))}
       {usage.removed_invented?.length > 0 && (
         <p className="muted">
-          <span className="pill warning">Guardrail</span> Removed {usage.removed_invented.length} technique(s) not in your
-          curriculum: {usage.removed_invented.join(', ')}
+          <span className="pill warning">Guardrail</span> Removed {usage.removed_invented.length} technique(s) {row.request?.mode === 'review'
+            ? 'that are not in your curriculum or that no one here has learned yet' : 'not in your curriculum'}: {usage.removed_invented.join(', ')}
         </p>
       )}
     </div>

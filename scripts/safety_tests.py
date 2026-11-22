@@ -7,6 +7,7 @@ Writes output/safety_tests.json with every result.
   2. An invented technique in a draft is caught by the rules (zero tokens).
   3. A dropped technique is caught by the rules (zero tokens).
   4. The Class Planner guardrail strips a technique that isn't in the curriculum.
+  4b. A review plan cannot list a technique that no one checked in has learned (zero tokens).
   5. The 11th AI run in an hour is refused (zero tokens).
   6. A school at 10x its monthly allowance is paused; one merely over its allowance is not (zero tokens).
   7. An agent stuck calling its tool forever is stopped by its per-run limit (zero tokens).
@@ -145,6 +146,21 @@ def test_planner_guardrail() -> dict:
     })
 
 
+def test_review_guardrail() -> dict:
+    draft, _ = load_good_draft()
+    ranks = [{"id": f"r{n}", "program_id": "p", "sort": n + 1, "name": b.name,
+              "requirements": [c.model_dump() for c in b.requirements]} for n, b in enumerate(draft.belts)]
+    data = ClassData(students=[{"id": "s", "name": "Test", "program_id": "p", "current_rank_sort": 1}],  # earned Blue only
+                     programs={"p": {"id": "p", "name": "Adult", "starting_rank": "White Belt"}}, ranks_by_program={"p": ranks})
+    plan = LessonPlan(title="Review", total_minutes=20, rationale="test", segments=[
+        Segment(minutes=20, title="Throws", who="All", techniques=["Nage: Osoto Gari", "Nage: Harai Goshi"], notes="")])
+    removed = strip_invented(plan, data.learned_items())  # Harai Goshi is a Purple Belt throw
+    ok = removed == ["Nage: Harai Goshi"] and plan.segments[0].techniques == ["Nage: Osoto Gari"]
+    return report("4b. A review cannot include material no one has learned", ok, {
+        "student": "Blue Belt", "plan_before": ["Nage: Osoto Gari", "Nage: Harai Goshi"],
+        "plan_after": plan.segments[0].techniques, "removed": removed, "tokens": 0})
+
+
 class StubDB:
     """Stands in for the database so the real guard code runs without touching real schools."""
 
@@ -200,7 +216,7 @@ async def test_runaway_loop() -> dict:
 
 
 async def main() -> None:
-    results = [await test_blatant_injection(), await test_injection(), test_invented(), test_dropped(), test_planner_guardrail(),
+    results = [await test_blatant_injection(), await test_injection(), test_invented(), test_dropped(), test_planner_guardrail(), test_review_guardrail(),
                await test_rate_limit(), await test_abuse_ceiling(), await test_runaway_loop()]
     out = ROOT / "output" / "safety_tests.json"
     out.write_text(json.dumps(results, indent=2), encoding="utf-8")

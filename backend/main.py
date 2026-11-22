@@ -11,6 +11,7 @@ import uuid
 import time
 from collections import defaultdict, deque
 from contextlib import asynccontextmanager
+from typing import Literal
 
 import httpx
 from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request, UploadFile
@@ -212,6 +213,7 @@ class PlanRequest(BaseModel):
     student_ids: list[str] = Field(min_length=1, max_length=60)
     minutes: int = Field(ge=15, le=180)
     focus: str = Field(default="", max_length=300)
+    mode: Literal["new", "review", "mix"] = "new"
 
 
 @app.post("/api/schools/{school_id}/lesson-plan")
@@ -219,7 +221,7 @@ async def lesson_plan(school_id: str, req: PlanRequest, who: Caller = Depends(ca
     await require_staff_with_budget(school_id, who)
     meter = UsageMeter()
     try:
-        plan, removed = await run_planner(who.db, school_id, req.student_ids, req.minutes, req.focus, meter)
+        plan, removed = await run_planner(who.db, school_id, req.student_ids, req.minutes, req.focus, meter, req.mode)
     except ValueError as e:
         raise HTTPException(400, str(e))
     usage = meter.summary()
