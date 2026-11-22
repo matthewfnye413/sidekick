@@ -61,7 +61,7 @@ function Login() {
         <div className="trust">
           <span>✓ Nothing published without your approval</span>
           <span>✓ Each school's data is private</span>
-          <span>✓ Less than a penny of AI per import</span>
+          <span>✓ About a penny of AI per import</span>
         </div>
       </section>
       <section className="landing-form">

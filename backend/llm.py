@@ -30,7 +30,7 @@ MODEL_NAME = "gpt-6-luna"
 PORTKEY_URL = "https://api.portkey.ai/v1"
 
 # Cap each model reply so one runaway answer can't burn the budget.
-MODEL_SETTINGS = ModelSettings(max_tokens=8000)
+MODEL_SETTINGS = ModelSettings(max_tokens=16000)
 
 _model: Model | None = None
 

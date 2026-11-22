@@ -42,6 +42,9 @@ function PlannerTab({ school }) {
     setBusy(false)
   }
 
+  // Reopening a saved plan also restores the length and focus it was made with.
+  const openPlan = (row) => { setPlan(row); setMinutes(row.request.minutes); setFocus(row.request.focus || '') }
+
   return (
     <>
       <h1>Class Planner</h1>
@@ -84,7 +87,7 @@ function PlannerTab({ school }) {
           <table><tbody>
             {history.map((h) => (
               <tr key={h.id}>
-                <td><button className="link" onClick={() => setPlan(h)}>{h.plan.title}</button></td>
+                <td><button className="link" onClick={() => openPlan(h)}>{h.plan.title}</button></td>
                 <td className="muted">{h.request.student_ids.length} students · {h.request.minutes} min</td>
                 <td className="muted">{fmtDate(h.created_at)}</td>
               </tr>
