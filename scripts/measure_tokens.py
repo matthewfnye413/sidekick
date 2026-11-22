@@ -23,9 +23,9 @@ from backend.extract import extract_text  # noqa: E402
 CASES = [
     ("EJJ Adult", "Adult", ["samples/ejj/Adult Curriculum.pdf"], "adult"),
     ("EJJ Kids", "Kids", ["samples/ejj/Kids Curriculum_white to orange.pdf"], "kids"),
-    ("Shoshin Ryu", "Shoshin Ryu", ["pilot_files/White to Yellow.pdf", "pilot_files/Yellow to Blue.pdf",
-                                     "pilot_files/Blue to Green.pdf"], None),
-    ("FCS Kali", "FCS Kali", ["pilot_files/fcs_curriculum_2014.pdf"], None),
+    # The pilot schools' files are their property and are not in the repository.
+    ("Pilot 2", "Adult", ["pilot_files/pilot2_1.pdf", "pilot_files/pilot2_2.pdf", "pilot_files/pilot2_3.pdf"], None),
+    ("Pilot 1", "Kali", ["pilot_files/pilot1.pdf"], None),
 ]
 
 
