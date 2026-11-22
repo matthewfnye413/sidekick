@@ -9,6 +9,8 @@ instructor approves it. Students and parents then track progress toward their ne
 optional **Class Planner agent** drafts a lesson from what the students on the mat still need, what they have
 already learned (review), or both.
 
+**Report:** `submission/report.html`  ·  **Slides:** `submission/slides.html` (download and open in a browser)
+
 MGT 409 final project · Matt Nye · model: **gpt-6-luna** for every agent (`OPENAI_API_KEY`, or the course `PORTKEY_API_KEY`).
 
 ---
