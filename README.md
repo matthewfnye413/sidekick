@@ -8,7 +8,7 @@ agent** reviews the result against the original document, and nothing reaches st
 instructor approves it. Students and parents then track progress toward their next rank, and an
 optional **Class Planner agent** drafts a lesson around what the students on the mat still need.
 
-MGT 409 final project · Matt Nye · model: **gpt-6-luna** (course Portkey key) for every agent.
+MGT 409 final project · Matt Nye · model: **gpt-6-luna** for every agent (`OPENAI_API_KEY`, or the course `PORTKEY_API_KEY`).
 
 ---
 
@@ -31,11 +31,11 @@ MGT 409 final project · Matt Nye · model: **gpt-6-luna** (course Portkey key) 
 ## Run it locally (fresh clone)
 
 Needs Python 3.12+ and Node 20+. The database is the hosted Supabase project (its URL and publishable
-key are public and built in), so the only secret is the course key.
+key are public and built in), so the only secret is one AI key.
 
 ```bash
-# 1. Key: PORTKEY_API_KEY in .env here, or in the .env one folder up (graders' layout)
-cp .env.example .env            # then fill in PORTKEY_API_KEY (or skip if ../.env has it)
+# 1. Key: OPENAI_API_KEY or PORTKEY_API_KEY in .env here, or in the .env one folder up (graders' layout)
+cp .env.example .env            # then fill in either key (or skip if ../.env has one)
 
 # 2. API (agents) — from the repo folder
 pip install -r requirements.txt
@@ -87,7 +87,7 @@ python scripts/measure_tokens.py    # tokens, cost and accuracy for every curric
 | `backend/rules.py` | Zero-token checks: invented techniques, dropped lines, duplicates, empty headings |
 | `backend/agents/planner.py` | Class Planner agent and its three tools; post-run guardrail |
 | `backend/main.py` | FastAPI: auth (acts as the signed-in user), rate limit, monthly token budget, usage log |
-| `backend/llm.py` | The single model: `gpt-6-luna` via Portkey; key read from `.env` here or one folder up |
+| `backend/llm.py` | The single model: `gpt-6-luna` via OpenAI or Portkey; key read from `.env` here or one folder up |
 | `supabase/schema.sql`, `supabase/migrations/` | Multi-school database with Row Level Security; rank-gated curriculum |
 | `frontend/` | React (Vite) web app |
 | `samples/ejj/` | Sample curriculum (Evolution Jujutsu, used with permission) + hand-verified answer key |

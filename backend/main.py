@@ -17,12 +17,13 @@ from fastapi import Depends, FastAPI, File, Form, Header, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from pydantic import BaseModel, Field
-from pydantic_ai.exceptions import AgentRunError, ModelHTTPError, UsageLimitExceeded
+from pydantic_ai.exceptions import AgentRunError, FallbackExceptionGroup, ModelHTTPError, UsageLimitExceeded
 
 from .agents.curriculum import run_import
 from .agents.planner import run_planner
 from .db import DBError, UserDB
 from .extract import ExtractError, extract_text
+from .llm import MODEL_NAME, providers
 from .usage import UsageMeter, log_run
 
 _http: httpx.AsyncClient | None = None
@@ -50,10 +51,12 @@ app.add_middleware(
 # Turn agent/database failures into readable JSON errors. (Handlers for specific exception
 # types run inside the CORS middleware, so the browser sees the message, not "Failed to fetch".)
 def friendly_error(exc: Exception) -> str:
+    if isinstance(exc, FallbackExceptionGroup):  # every key failed: report the last one
+        exc = exc.exceptions[-1]
     if isinstance(exc, UsageLimitExceeded):
         return "The AI run hit its safety limit and was stopped before finishing. Try a smaller file or class."
     if isinstance(exc, ModelHTTPError) and exc.status_code in (401, 403):
-        return "The AI service rejected SideKick's API key. The site owner needs to check the server's PORTKEY_API_KEY."
+        return "The AI service rejected SideKick's API key. The site owner needs to check the server's OPENAI_API_KEY or PORTKEY_API_KEY."
     if isinstance(exc, ModelHTTPError) and "content_filter" in str(exc.body):
         return ("The AI provider's safety filter blocked this file. It may contain text aimed at manipulating an AI. "
                 "Check the document, remove anything that isn't curriculum, and upload it again.")
@@ -63,7 +66,8 @@ def friendly_error(exc: Exception) -> str:
 
 
 @app.exception_handler(AgentRunError)
-async def agent_error(request: Request, exc: AgentRunError):
+@app.exception_handler(FallbackExceptionGroup)
+async def agent_error(request: Request, exc: Exception):
     print(f"Agent error on {request.url.path}: {exc!r}")
     return JSONResponse(status_code=502, content={"detail": friendly_error(exc)})
 
@@ -135,7 +139,7 @@ async def record_usage(who: Caller, school_id: str, kind: str, usage: dict) -> N
 # ─── Routes ──────────────────────────────────────────────────────────────────
 @app.get("/api/health")
 async def health():
-    return {"ok": True, "model": "gpt-6-luna"}
+    return {"ok": True, "model": MODEL_NAME, "providers": providers()}  # names only, never keys
 
 
 @app.post("/api/schools/{school_id}/imports")

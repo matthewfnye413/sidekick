@@ -10,6 +10,8 @@ services:
     envVars:
       - key: PYTHON_VERSION
         value: 3.12.8
+      - key: OPENAI_API_KEY
+        sync: false          # entered by hand in the Render dashboard, never committed
       - key: PORTKEY_API_KEY
         sync: false          # entered by hand in the Render dashboard, never committed
       - key: ALLOWED_ORIGINS
