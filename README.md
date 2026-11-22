@@ -94,8 +94,8 @@ python scripts/measure_tokens.py    # tokens, cost and accuracy for every curric
 
 ## Safety
 
-* **Uploaded documents are data, not instructions.** Blatant injections are blocked by the model
-  provider's content filter; subtler ones reach the agent, are ignored, and are flagged to the instructor
+* **Uploaded documents are data, not instructions.** Injected text that reaches the agent is ignored and
+  flagged to the instructor; through the Portkey gateway, a content filter also blocks blatant attempts outright
   (`scripts/safety_tests.py`, results in the report).
 * **No invented techniques.** Every item must appear in the uploaded document; the planner's output is
   filtered against the published curriculum.
